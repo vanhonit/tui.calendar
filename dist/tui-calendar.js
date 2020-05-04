@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Wed Feb 05 2020
+ * @version 1.12.11 | Mon May 04 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -7102,6 +7102,10 @@ Base.prototype.updateSchedule = function(schedule, options) {
         schedule.set('state', options.state);
     }
 
+    if (options.raw) {
+        schedule.set('raw', options.raw);
+    }
+
     this._removeFromMatrix(schedule);
     this._addToMatrix(schedule);
 
@@ -13820,7 +13824,7 @@ MonthGuide.prototype._getGuideElement = function(y) {
 MonthGuide.prototype._getCoordByDate = function(date) {
     var WEEKEND_DAYS = 2;
     var weeks = this.weeks;
-    var isWorkWeek = this.view.options.workweek;
+    var isWorkWeek = util.pick(this.view, 'options', 'workweek');
     var days = isWorkWeek ? this.days + WEEKEND_DAYS : this.days;
 
     var getIdxFromDiff = function(d1, d2) {
@@ -15331,9 +15335,10 @@ var timeCore = {
         // and convert milliseconds value to hours.
         var result = datetime.millisecondsTo('hour', (y * baseMil) / height),
             floored = result | 0,
-            nearest = common.nearest(result - floored, [0, 1]);
+            nearest = common.nearest(result - floored, [0.25, 0.5, 0.75, 1]);
 
-        return floored + (nearest ? 0.5 : 0);
+        // return floored + (nearest ? 0.5 : 0);
+        return floored + nearest;
     },
 
     /**
