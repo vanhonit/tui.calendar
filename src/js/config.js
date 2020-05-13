@@ -7,7 +7,8 @@
 var cssPrefix = '/* @echo CSS_PREFIX */',
     alldayGetViewID = new RegExp('^' + cssPrefix + 'weekday[\\s]tui-view-(\\d+)'),
     alldayCheckPermission = new RegExp('^' + cssPrefix + 'schedule(-title)?$'),
-    timeGetViewID = new RegExp('^' + cssPrefix + 'time-date[\\s]tui-view-(\\d+)');
+    timeGetViewID = new RegExp('^' + cssPrefix + 'time-date[\\s]tui-view-(\\d+)'),
+    timeGetCreationViewID = new RegExp('^' + cssPrefix + 'time-guide-creation');
 
 var config = {
     throwError: function(msg) {
@@ -42,7 +43,8 @@ var config = {
     },
 
     time: {
-        getViewIDRegExp: timeGetViewID
+        getViewIDRegExp: timeGetViewID,
+        timeGetCreationViewID: timeGetCreationViewID
     }
 };
 

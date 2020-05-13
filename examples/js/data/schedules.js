@@ -5,9 +5,13 @@
 var ScheduleList = [];
 
 var SCHEDULE_CATEGORY = [
-    'milestone',
-    'task'
+    'time',
+    'time'
 ];
+// var SCHEDULE_CATEGORY = [
+//     'milestone',
+//     'task'
+// ];
 
 function ScheduleInfo() {
     this.id = null;
@@ -57,17 +61,19 @@ function generateTime(schedule, renderStart, renderEnd) {
     var endDate = moment(renderEnd.getTime());
     var diffDate = endDate.diff(startDate, 'days');
 
-    schedule.isAllday = chance.bool({likelihood: 30});
-    if (schedule.isAllday) {
-        schedule.category = 'allday';
-    } else if (chance.bool({likelihood: 30})) {
-        schedule.category = SCHEDULE_CATEGORY[chance.integer({min: 0, max: 1})];
-        if (schedule.category === SCHEDULE_CATEGORY[1]) {
-            schedule.dueDateClass = 'morning';
-        }
-    } else {
-        schedule.category = 'time';
-    }
+    schedule.isAllday = false; // chance.bool({likelihood: 30});
+    // if (schedule.isAllday) {
+    //     schedule.category = 'allday';
+    // } else if (chance.bool({likelihood: 30})) {
+    //     schedule.category = SCHEDULE_CATEGORY[chance.integer({min: 0, max: 1})];
+    //     if (schedule.category === SCHEDULE_CATEGORY[1]) {
+    //         schedule.dueDateClass = 'morning';
+    //     }
+    // } else {
+    //     schedule.category = 'time';
+    // }
+
+    schedule.category = 'time';
 
     startDate.add(chance.integer({min: 0, max: diffDate}), 'days');
     startDate.hours(chance.integer({min: 0, max: 23}))

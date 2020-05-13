@@ -11,6 +11,8 @@
     var useDetailPopup = true;
     var datePicker, selectedCalendar;
 
+    var availableTime = [];
+
     cal = new Calendar('#calendar', {
         defaultView: 'week',
         useCreationPopup: useCreationPopup,
@@ -25,8 +27,31 @@
             },
             time: function(schedule) {
                 return getTimeTemplate(schedule, false);
+            },
+            creationGuide: function(evenData) {
+                console.log('custom creation guide', evenData);
+
+                return '<div>custom creation guide</div>';
             }
+        },
+        theme: {
+            'week.timegridOneHour.height': '200px',
+            'week.timegridHalfHour.height': '100px'
+        },
+        scheduleView: ['time'],
+        taskView: false,
+        disableClick: true,
+        disableDblClick: true,
+        showCreationGuideOnHover: true,
+        customCheckExpectedCondition: function(time) { //eslint-disable-line
+            // console.log(new Date(time.timeY), availableTime);
+
+            return {
+                endTime: new Date().setHours(new Date().getHours() + (Math.floor(Math.random() * 2) + 1))
+            };
         }
+
+        // isReadOnly: true
     });
 
     // event handlers
@@ -277,7 +302,7 @@
             borderColor: calendar.borderColor,
             location: scheduleData.location,
             raw: {
-                class: scheduleData.raw['class']
+                class: scheduleData.raw ? scheduleData.raw['class'] : ''
             },
             state: scheduleData.state
         };

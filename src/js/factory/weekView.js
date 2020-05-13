@@ -31,18 +31,24 @@ var TimeClick = require('../handler/time/click');
 var TimeCreation = require('../handler/time/creation');
 var TimeMove = require('../handler/time/move');
 var TimeResize = require('../handler/time/resize');
+var TimeMouseMove = require('../handler/time/mousemove');
+var TimeMouseLeave = require('../handler/time/mouseleave');
 
 var DAYGRID_HANDLDERS = {
     'click': DayGridClick,
     'creation': DayGridCreation,
     'move': DayGridMove,
-    'resize': DayGridResize
+    'resize': DayGridResize,
+    'mousemove': TimeMouseMove,
+    'mouseleave': TimeMouseLeave
 };
 var TIMEGRID_HANDLERS = {
     'click': TimeClick,
     'creation': TimeCreation,
     'move': TimeMove,
-    'resize': TimeResize
+    'resize': TimeResize,
+    'mousemove': TimeMouseMove,
+    'mouseleave': TimeMouseLeave
 };
 var DEFAULT_PANELS = [
     {
@@ -79,7 +85,7 @@ var DEFAULT_PANELS = [
         name: 'time',
         type: 'timegrid',
         autoHeight: true,
-        handlers: ['click', 'creation', 'move', 'resize'],
+        handlers: ['click', 'creation', 'move', 'resize', 'mousemove', 'mouseleave'],
         show: true
     }
 ];
@@ -145,7 +151,9 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
         dayname: {},
         creation: {},
         move: {},
-        resize: {}
+        resize: {},
+        mousemove: {},
+        mouseleave: {}
     };
 
     dayNameContainer = domutil.appendHTMLElement('div', weekView.container, config.classname('dayname-layout'));
@@ -191,7 +199,7 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
             weekView.addChild(view);
 
             util.forEach(handlers, function(type) {
-                if (!options.isReadOnly || type === 'click') {
+                if (!options.isReadOnly || type === 'click' || type === 'mousemove' || type === 'mouseleave') {
                     weekView.handler[type][name] =
                         new DAYGRID_HANDLDERS[type](dragHandler, view, baseController, options);
                     view.addHandler(type, weekView.handler[type][name], vLayout.getPanelByName(name));
@@ -204,7 +212,7 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
             view = new TimeGrid(name, options, vLayout.getPanelByName(name).container);
             weekView.addChild(view);
             util.forEach(handlers, function(type) {
-                if (!options.isReadOnly || type === 'click') {
+                if (!options.isReadOnly || type === 'click' || type === 'mousemove' || type === 'mouseleave') {
                     weekView.handler[type][name] =
                         new TIMEGRID_HANDLERS[type](dragHandler, view, baseController, options);
                 }

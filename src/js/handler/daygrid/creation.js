@@ -70,8 +70,14 @@ function DayGridCreation(dragHandler, view, controller, options) {
      */
     this._disableClick = options.disableClick;
 
+    /**
+     * @type {boolean}
+     */
+    this._disableHover = options._disableHover;
+
     dragHandler.on('dragStart', this._onDragStart, this);
     dragHandler.on('click', this._onClick, this);
+    domevent.on(view.container, 'mouseover', this._onMouseOver, this);
 
     if (this._disableDblClick) {
         CLICK_DELAY = 0;
@@ -292,6 +298,33 @@ DayGridCreation.prototype._onClick = function(clickEventData) {
             self._createSchedule(scheduleData);
         }
         self._requestOnClick = false;
+    }, CLICK_DELAY);
+};
+
+/**
+ * Click event handler method.
+ * @emits DayGridCreation#hover
+ * @param {object} hoverEventData - Drag#click event handler data.
+ */
+DayGridCreation.prototype._onMouseOver = function(hoverEventData) {
+    var self = this;
+    var getScheduleDataFunc, scheduleData;
+    console.log('hree');
+    if (!this.checkExpectedCondition(hoverEventData.target) || this._disableHover) {
+        return;
+    }
+
+    getScheduleDataFunc = this._retriveScheduleData(this.view, hoverEventData.originEvent);
+    scheduleData = getScheduleDataFunc(hoverEventData.originEvent);
+
+    this._requestOnHover = true;
+    setTimeout(function() {
+        if (self._requestOnHover) {
+            console.log('hrere');
+            self.fire('mouseenter', scheduleData);
+            self._createSchedule(scheduleData);
+        }
+        self._requestOnHover = false;
     }, CLICK_DELAY);
 };
 

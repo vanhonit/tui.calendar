@@ -59,7 +59,9 @@ function TimeCreationGuide(timeCreation) {
     timeCreation.on({
         timeCreationDragstart: this._createGuideElement,
         timeCreationDrag: this._onDrag,
-        timeCreationClick: this._createGuideElement
+        timeCreationClick: this._createGuideElement,
+        timeCreationHover: this._createGuideElement,
+        clearCreationGuide: this._clearGuideElement
     }, this);
 
     this.applyTheme(timeCreation.baseController.theme);
@@ -93,6 +95,23 @@ TimeCreationGuide.prototype.clearGuideElement = function() {
 };
 
 /**
+ * Clear guide element.
+ */
+TimeCreationGuide.prototype._clearGuideElement = function() {
+    var guideElement = this.guideElement,
+        timeElement = this.guideTimeElement;
+
+    domutil.remove(guideElement);
+
+    reqAnimFrame.requestAnimFrame(function() {
+        guideElement.style.display = 'none';
+        guideElement.style.top = '';
+        guideElement.style.height = '';
+        timeElement.innerHTML = '';
+    });
+};
+
+/**
  * Refresh guide element
  * @param {number} top - The number of guide element's style top
  * @param {number} height - The number of guide element's style height
@@ -103,7 +122,6 @@ TimeCreationGuide.prototype.clearGuideElement = function() {
 TimeCreationGuide.prototype._refreshGuideElement = function(top, height, start, end, bottomLabel) {
     var guideElement = this.guideElement;
     var timeElement = this.guideTimeElement;
-
     guideElement.style.top = top + 'px';
     guideElement.style.height = height + 'px';
     guideElement.style.display = 'block';
@@ -205,16 +223,21 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
  */
 TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
     var relatedView = dragStartEventData.relatedView,
+        customCreationGuideEndTime = dragStartEventData.endTime,
         hourStart = datetime.millisecondsFrom('hour', dragStartEventData.hourStart) || 0,
-        unitData, styleFunc, styleData, result, top, height, start, end;
-
+        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
-
     start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
     end = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
+
+    if (customCreationGuideEndTime) {
+        customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
+        customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
+    }
+    end = new TZDate(customEndTime);
     height = (unitData[4] * (end - start) / MIN60);
 
     result = this._limitStyleData(

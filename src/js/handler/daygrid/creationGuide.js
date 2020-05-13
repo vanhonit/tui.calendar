@@ -35,7 +35,8 @@ function DayGridCreationGuide(creation) {
     creation.on({
         dragstart: this._createGuideElement,
         drag: this._onDrag,
-        click: this._createGuideElement
+        click: this._createGuideElement,
+        mouseover: this._createGuideElement
     }, this);
 }
 

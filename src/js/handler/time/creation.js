@@ -16,7 +16,7 @@ var TZDate = require('../../common/timezone').Date;
 var timeCore = require('./core');
 
 var CLICK_DELAY = 300;
-
+var HOVER_DELAY = 50;
 /**
  * @constructor
  * @implements {Handler}
@@ -76,10 +76,30 @@ function TimeCreation(dragHandler, timeGridView, baseController, options) {
     /**
      * @type {boolean}
      */
+    this._showCreationGuideOnHover = options.showCreationGuideOnHover;
+
+    /**
+     * @type {function}
+     */
+    this._customCheckExpectedCondition = options.customCheckExpectedCondition;
+
+    /**
+     * @type {function}
+     */
+    this._creationGuideTemplate = options.template.creationGuide || {};
+
+    /**
+     * @type {boolean}
+     */
     this._disableClick = options.disableClick;
 
     dragHandler.on('dragStart', this._onDragStart, this);
     dragHandler.on('click', this._onClick, this);
+
+    if (this._showCreationGuideOnHover) {
+        domevent.on(timeGridView.container, 'mousemove', this._onMouseMove, this);
+        domevent.on(timeGridView.container, 'mouseleave', this._onMouseLeave, this);
+    }
 
     if (this._disableDblClick) {
         CLICK_DELAY = 0;
@@ -113,7 +133,6 @@ TimeCreation.prototype.destroy = function() {
 TimeCreation.prototype.checkExpectedCondition = function(target) {
     var cssClass = domutil.getClass(target),
         matches;
-
     if (cssClass === config.classname('time-date-schedule-block-wrap')) {
         target = target.parentNode;
         cssClass = domutil.getClass(target);
@@ -298,6 +317,60 @@ TimeCreation.prototype._onDragEnd = function(dragEndEventData) {
      * @property {number[]} createRange - milliseconds range between drag start and end to create.
      */
     this._onDrag(dragEndEventData, 'timeCreationDragend', reviseFunc);
+
+    this._dragStart = this._getScheduleDataFunc = null;
+};
+/**
+ * Drag#click event handler
+ * @emits TimeCreation#timeCreationHover
+ * @param {object} clickEventData - event data from Drag#click.
+ */
+TimeCreation.prototype._onMouseMove = function(clickEventData) {
+    var self = this;
+    var condResult, getScheduleDataFunc, eventData, customCondResult;
+    this.dragHandler.off({
+        drag: this._onDrag,
+        dragEnd: this._onDragEnd
+    }, this);
+
+    condResult = this.checkExpectedCondition(clickEventData.target);
+    if (!condResult || this._disableHover) {
+        // self.fire('clearCreationGuide', eventData);
+
+        return;
+    }
+
+    getScheduleDataFunc = this._retriveScheduleData(condResult);
+    eventData = getScheduleDataFunc(clickEventData);
+
+    if (this._customCheckExpectedCondition) {
+        customCondResult = this._customCheckExpectedCondition(eventData);
+        if (!customCondResult) {
+            return;
+        }
+    }
+    eventData.endTime = customCondResult.endTime;
+    this._requestOnHover = true;
+    setTimeout(function() {
+        if (self._requestOnHover) {
+            self.fire('timeCreationHover', eventData);
+            // self._createSchedule(eventData);
+        }
+        self._requestOnHover = false;
+    }, HOVER_DELAY);
+    this._dragStart = this._getScheduleDataFunc = null;
+};
+
+/**
+ * Drag#hover event handler
+ * @emits TimeCreation#timeCreationHover
+ * @param {object} hoveEvenData - event data from Drag#hover.
+ */
+TimeCreation.prototype._onMouseLeave = function() { // hoveEvenData
+    var self = this;
+    var eventData; // condResult, getScheduleDataFunc, eventData;
+
+    self.fire('clearCreationGuide', eventData);
 
     this._dragStart = this._getScheduleDataFunc = null;
 };
