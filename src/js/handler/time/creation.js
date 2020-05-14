@@ -86,7 +86,7 @@ function TimeCreation(dragHandler, timeGridView, baseController, options) {
     /**
      * @type {function}
      */
-    this._creationGuideTemplate = options.template.creationGuide || {};
+    this._creationGuideTemplate = options.template.creationGuide;
 
     /**
      * @type {boolean}
@@ -350,6 +350,7 @@ TimeCreation.prototype._onMouseMove = function(clickEventData) {
         }
     }
     eventData.endTime = customCondResult.endTime;
+    eventData.template = this._creationGuideTemplate;
     this._requestOnHover = true;
     setTimeout(function() {
         if (self._requestOnHover) {

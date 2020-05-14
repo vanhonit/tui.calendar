@@ -126,8 +126,12 @@ TimeCreationGuide.prototype._refreshGuideElement = function(top, height, start, 
     guideElement.style.height = height + 'px';
     guideElement.style.display = 'block';
 
-    timeElement.innerHTML = datetime.format(start, 'HH:mm') +
+    if (this._creationGuideTemplate) {
+        guideElement.innerHTML = this._creationGuideTemplate(start, end);
+    } else {
+        timeElement.innerHTML = datetime.format(start, 'HH:mm') +
         ' - ' + datetime.format(end, 'HH:mm');
+    }
 
     if (bottomLabel) {
         domutil.removeClass(timeElement, config.classname('time-guide-bottom'));
@@ -226,6 +230,9 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         customCreationGuideEndTime = dragStartEventData.endTime,
         hourStart = datetime.millisecondsFrom('hour', dragStartEventData.hourStart) || 0,
         unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
+
+    this._creationGuideTemplate = dragStartEventData.template;
+
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
@@ -246,7 +253,6 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         start,
         end
     );
-
     this._refreshGuideElement.apply(this, result);
 
     relatedView.container.appendChild(this.guideElement);
