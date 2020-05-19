@@ -1,9 +1,10 @@
 <div class="{{CSS_PREFIX}}time-date-schedule-block-wrap" style="margin-right: {{styles.marginRight}};">
+    <div class="{{#if isDisableGrid}} {{CSS_PREFIX}}time-date-schedule-block-disable{{/if}}"></div>
 {{#each matrices}}
     {{#each this}}
         {{#each this}}
         {{#if this ~}}
-        <div class="{{CSS_PREFIX}}time-date-schedule-block {{#if model.isPending}} {{CSS_PREFIX}}time-date-schedule-block-pending{{/if}}" data-id="{{stamp model}}"
+        <div class="{{CSS_PREFIX}}time-date-schedule-block {{#if model.isPending}} {{CSS_PREFIX}}time-date-schedule-block-pending{{/if}} {{model.dueDateClass}}" data-id="{{stamp model}}"
             style="{{time-scheduleBlock this}};
                 {{#fi left '!==' 0}}
                     padding-left: {{@root.styles.paddingLeft}};

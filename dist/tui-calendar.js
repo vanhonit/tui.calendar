@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Mon May 04 2020
+ * @version 1.12.11 | Mon May 18 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -3092,7 +3092,7 @@ datetime = {
      * The number of milliseconds 20 minutes for schedule min duration
      * @type {number}
      */
-    MILLISECONDS_SCHEDULE_MIN_DURATION: 20 * 60000,
+    MILLISECONDS_SCHEDULE_MIN_DURATION: 15 * 60000,
 
     /**
      * convert milliseconds
@@ -10447,18 +10447,24 @@ var TimeClick = __webpack_require__(/*! ../handler/time/click */ "./src/js/handl
 var TimeCreation = __webpack_require__(/*! ../handler/time/creation */ "./src/js/handler/time/creation.js");
 var TimeMove = __webpack_require__(/*! ../handler/time/move */ "./src/js/handler/time/move.js");
 var TimeResize = __webpack_require__(/*! ../handler/time/resize */ "./src/js/handler/time/resize.js");
+var TimeMouseMove = __webpack_require__(/*! ../handler/time/mousemove */ "./src/js/handler/time/mousemove.js");
+var TimeMouseLeave = __webpack_require__(/*! ../handler/time/mouseleave */ "./src/js/handler/time/mouseleave.js");
 
 var DAYGRID_HANDLDERS = {
     'click': DayGridClick,
     'creation': DayGridCreation,
     'move': DayGridMove,
-    'resize': DayGridResize
+    'resize': DayGridResize,
+    'mousemove': TimeMouseMove,
+    'mouseleave': TimeMouseLeave
 };
 var TIMEGRID_HANDLERS = {
     'click': TimeClick,
     'creation': TimeCreation,
     'move': TimeMove,
-    'resize': TimeResize
+    'resize': TimeResize,
+    'mousemove': TimeMouseMove,
+    'mouseleave': TimeMouseLeave
 };
 var DEFAULT_PANELS = [
     {
@@ -10495,7 +10501,7 @@ var DEFAULT_PANELS = [
         name: 'time',
         type: 'timegrid',
         autoHeight: true,
-        handlers: ['click', 'creation', 'move', 'resize'],
+        handlers: ['click', 'creation', 'move', 'resize', 'mousemove', 'mouseleave'],
         show: true
     }
 ];
@@ -10561,7 +10567,9 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
         dayname: {},
         creation: {},
         move: {},
-        resize: {}
+        resize: {},
+        mousemove: {},
+        mouseleave: {}
     };
 
     dayNameContainer = domutil.appendHTMLElement('div', weekView.container, config.classname('dayname-layout'));
@@ -10607,7 +10615,7 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
             weekView.addChild(view);
 
             util.forEach(handlers, function(type) {
-                if (!options.isReadOnly || type === 'click') {
+                if (!options.isReadOnly || type === 'click' || type === 'mousemove' || type === 'mouseleave') {
                     weekView.handler[type][name] =
                         new DAYGRID_HANDLDERS[type](dragHandler, view, baseController, options);
                     view.addHandler(type, weekView.handler[type][name], vLayout.getPanelByName(name));
@@ -10620,7 +10628,7 @@ module.exports = function(baseController, layoutContainer, dragHandler, options,
             view = new TimeGrid(name, options, vLayout.getPanelByName(name).container);
             weekView.addChild(view);
             util.forEach(handlers, function(type) {
-                if (!options.isReadOnly || type === 'click') {
+                if (!options.isReadOnly || type === 'click' || type === 'mousemove' || type === 'mouseleave') {
                     weekView.handler[type][name] =
                         new TIMEGRID_HANDLERS[type](dragHandler, view, baseController, options);
                 }
@@ -11178,8 +11186,14 @@ function DayGridCreation(dragHandler, view, controller, options) {
      */
     this._disableClick = options.disableClick;
 
+    /**
+     * @type {boolean}
+     */
+    this._disableHover = options._disableHover;
+
     dragHandler.on('dragStart', this._onDragStart, this);
     dragHandler.on('click', this._onClick, this);
+    domevent.on(view.container, 'mouseover', this._onMouseOver, this);
 
     if (this._disableDblClick) {
         CLICK_DELAY = 0;
@@ -11404,6 +11418,33 @@ DayGridCreation.prototype._onClick = function(clickEventData) {
 };
 
 /**
+ * Click event handler method.
+ * @emits DayGridCreation#hover
+ * @param {object} hoverEventData - Drag#click event handler data.
+ */
+DayGridCreation.prototype._onMouseOver = function(hoverEventData) {
+    var self = this;
+    var getScheduleDataFunc, scheduleData;
+    console.log('hree');
+    if (!this.checkExpectedCondition(hoverEventData.target) || this._disableHover) {
+        return;
+    }
+
+    getScheduleDataFunc = this._retriveScheduleData(this.view, hoverEventData.originEvent);
+    scheduleData = getScheduleDataFunc(hoverEventData.originEvent);
+
+    this._requestOnHover = true;
+    setTimeout(function() {
+        if (self._requestOnHover) {
+            console.log('hrere');
+            self.fire('mouseenter', scheduleData);
+            self._createSchedule(scheduleData);
+        }
+        self._requestOnHover = false;
+    }, CLICK_DELAY);
+};
+
+/**
  * Dblclick event handler method.
  * @emits DayGridCreation#click
  * @param {object} clickEventData - Drag#Click event handler data.
@@ -11493,7 +11534,8 @@ function DayGridCreationGuide(creation) {
     creation.on({
         dragstart: this._createGuideElement,
         drag: this._onDrag,
-        click: this._createGuideElement
+        click: this._createGuideElement,
+        mouseover: this._createGuideElement
     }, this);
 }
 
@@ -15488,7 +15530,7 @@ var TZDate = __webpack_require__(/*! ../../common/timezone */ "./src/js/common/t
 var timeCore = __webpack_require__(/*! ./core */ "./src/js/handler/time/core.js");
 
 var CLICK_DELAY = 300;
-
+var HOVER_DELAY = 50;
 /**
  * @constructor
  * @implements {Handler}
@@ -15548,10 +15590,30 @@ function TimeCreation(dragHandler, timeGridView, baseController, options) {
     /**
      * @type {boolean}
      */
+    this._showCreationGuideOnHover = options.showCreationGuideOnHover;
+
+    /**
+     * @type {function}
+     */
+    this._customCheckExpectedCondition = options.customCheckExpectedCondition;
+
+    /**
+     * @type {function}
+     */
+    this._creationGuideTemplate = options.template.creationGuide;
+
+    /**
+     * @type {boolean}
+     */
     this._disableClick = options.disableClick;
 
     dragHandler.on('dragStart', this._onDragStart, this);
     dragHandler.on('click', this._onClick, this);
+
+    if (this._showCreationGuideOnHover) {
+        domevent.on(timeGridView.container, 'mousemove', this._onMouseMove, this);
+        domevent.on(timeGridView.container, 'mouseleave', this._onMouseLeave, this);
+    }
 
     if (this._disableDblClick) {
         CLICK_DELAY = 0;
@@ -15585,7 +15647,6 @@ TimeCreation.prototype.destroy = function() {
 TimeCreation.prototype.checkExpectedCondition = function(target) {
     var cssClass = domutil.getClass(target),
         matches;
-
     if (cssClass === config.classname('time-date-schedule-block-wrap')) {
         target = target.parentNode;
         cssClass = domutil.getClass(target);
@@ -15773,6 +15834,61 @@ TimeCreation.prototype._onDragEnd = function(dragEndEventData) {
 
     this._dragStart = this._getScheduleDataFunc = null;
 };
+/**
+ * Drag#click event handler
+ * @emits TimeCreation#timeCreationHover
+ * @param {object} clickEventData - event data from Drag#click.
+ */
+TimeCreation.prototype._onMouseMove = function(clickEventData) {
+    var self = this;
+    var condResult, getScheduleDataFunc, eventData, customCondResult;
+    this.dragHandler.off({
+        drag: this._onDrag,
+        dragEnd: this._onDragEnd
+    }, this);
+
+    condResult = this.checkExpectedCondition(clickEventData.target);
+    if (!condResult || this._disableHover) {
+        // self.fire('clearCreationGuide', eventData);
+
+        return;
+    }
+
+    getScheduleDataFunc = this._retriveScheduleData(condResult);
+    eventData = getScheduleDataFunc(clickEventData);
+
+    if (this._customCheckExpectedCondition) {
+        customCondResult = this._customCheckExpectedCondition(eventData);
+        if (!customCondResult) {
+            return;
+        }
+    }
+    eventData.endTime = customCondResult.endTime;
+    eventData.template = this._creationGuideTemplate;
+    this._requestOnHover = true;
+    setTimeout(function() {
+        if (self._requestOnHover) {
+            self.fire('timeCreationHover', eventData);
+            // self._createSchedule(eventData);
+        }
+        self._requestOnHover = false;
+    }, HOVER_DELAY);
+    this._dragStart = this._getScheduleDataFunc = null;
+};
+
+/**
+ * Drag#hover event handler
+ * @emits TimeCreation#timeCreationHover
+ * @param {object} hoveEvenData - event data from Drag#hover.
+ */
+TimeCreation.prototype._onMouseLeave = function() { // hoveEvenData
+    var self = this;
+    var eventData; // condResult, getScheduleDataFunc, eventData;
+
+    self.fire('clearCreationGuide', eventData);
+
+    this._dragStart = this._getScheduleDataFunc = null;
+};
 
 /**
  * Drag#click event handler
@@ -15939,7 +16055,9 @@ function TimeCreationGuide(timeCreation) {
     timeCreation.on({
         timeCreationDragstart: this._createGuideElement,
         timeCreationDrag: this._onDrag,
-        timeCreationClick: this._createGuideElement
+        timeCreationClick: this._createGuideElement,
+        timeCreationHover: this._createGuideElement,
+        clearCreationGuide: this._clearGuideElement
     }, this);
 
     this.applyTheme(timeCreation.baseController.theme);
@@ -15973,6 +16091,23 @@ TimeCreationGuide.prototype.clearGuideElement = function() {
 };
 
 /**
+ * Clear guide element.
+ */
+TimeCreationGuide.prototype._clearGuideElement = function() {
+    var guideElement = this.guideElement,
+        timeElement = this.guideTimeElement;
+
+    domutil.remove(guideElement);
+
+    reqAnimFrame.requestAnimFrame(function() {
+        guideElement.style.display = 'none';
+        guideElement.style.top = '';
+        guideElement.style.height = '';
+        timeElement.innerHTML = '';
+    });
+};
+
+/**
  * Refresh guide element
  * @param {number} top - The number of guide element's style top
  * @param {number} height - The number of guide element's style height
@@ -15983,13 +16118,16 @@ TimeCreationGuide.prototype.clearGuideElement = function() {
 TimeCreationGuide.prototype._refreshGuideElement = function(top, height, start, end, bottomLabel) {
     var guideElement = this.guideElement;
     var timeElement = this.guideTimeElement;
-
     guideElement.style.top = top + 'px';
     guideElement.style.height = height + 'px';
     guideElement.style.display = 'block';
 
-    timeElement.innerHTML = datetime.format(start, 'HH:mm') +
+    if (this._creationGuideTemplate) {
+        guideElement.innerHTML = this._creationGuideTemplate(start, end);
+    } else {
+        timeElement.innerHTML = datetime.format(start, 'HH:mm') +
         ' - ' + datetime.format(end, 'HH:mm');
+    }
 
     if (bottomLabel) {
         domutil.removeClass(timeElement, config.classname('time-guide-bottom'));
@@ -16085,16 +16223,24 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
  */
 TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
     var relatedView = dragStartEventData.relatedView,
+        customCreationGuideEndTime = dragStartEventData.endTime,
         hourStart = datetime.millisecondsFrom('hour', dragStartEventData.hourStart) || 0,
-        unitData, styleFunc, styleData, result, top, height, start, end;
+        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
+
+    this._creationGuideTemplate = dragStartEventData.template;
 
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
-
     start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
     end = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
+
+    if (customCreationGuideEndTime) {
+        customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
+        customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
+    }
+    end = new TZDate(customEndTime);
     height = (unitData[4] * (end - start) / MIN60);
 
     result = this._limitStyleData(
@@ -16103,7 +16249,6 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         start,
         end
     );
-
     this._refreshGuideElement.apply(this, result);
 
     relatedView.container.appendChild(this.guideElement);
@@ -16169,6 +16314,292 @@ TimeCreationGuide.prototype.applyTheme = function(theme) {
 module.exports = TimeCreationGuide;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./src/js/handler/time/mouseleave.js":
+/*!*******************************************!*\
+  !*** ./src/js/handler/time/mouseleave.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * @fileoverview mouseover handle module for daygrid schedules
+ * @author Nghia Nguyen FE Development <nghiancqt@gmail.com>
+ */
+
+
+var util = __webpack_require__(/*! tui-code-snippet */ "tui-code-snippet");
+var config = __webpack_require__(/*! ../../config */ "./src/js/config.js");
+var domutil = __webpack_require__(/*! ../../common/domutil */ "./src/js/common/domutil.js");
+var DayGridMove = __webpack_require__(/*! ./move */ "./src/js/handler/time/move.js");
+
+/**
+ * @constructor
+ * @implements {Handler}
+ * @mixes CustomEvents
+ * @param {Drag} [dragHandler] - Drag handler instance.
+ * @param {DayGrid} [view] - daygrid view instance.
+ * @param {Base} [controller] - Base controller instance.
+ */
+function DayGridMouseOver(dragHandler, view, controller) {
+    /**
+     * @type {Drag}
+     */
+    this.dragHandler = dragHandler;
+
+    /**
+     * @type {DayGrid}
+     */
+    this.view = view;
+
+    /**
+     * @type {Base}
+     */
+    this.controller = controller;
+
+    dragHandler.on({
+        'mouseleave': this._onMouseLeave
+    }, this);
+}
+
+/**
+ * Destroy handler module
+ */
+DayGridMouseOver.prototype.destroy = function() {
+    this.dragHandler.off(this);
+    this.view = this.controller = this.dragHandler = null;
+};
+
+/**
+ * Check target element is expected condition for activate this plugins.
+ * @param {HTMLElement} target - The element to check
+ * @returns {string} - model id
+ */
+DayGridMouseOver.prototype.checkExpectCondition = DayGridMove.prototype.checkExpectedCondition;
+
+/**
+ * Mouseover event handler
+ * @param {object} hoverEvent - click event data
+ * @emits DayGridMouseOver#clickSchedule
+ * @emits DayGridMouseOver#collapse
+ * @emits DayGridMouseOver#expand
+ */
+DayGridMouseOver.prototype._onMouseLeave = function(hoverEvent) {
+    var self = this,
+        target = hoverEvent.target,
+        dayGridScheduleView = this.checkExpectCondition(target),
+        scheduleCollection = this.controller.schedules,
+        collapseBtnElement = domutil.closest(
+            target,
+            config.classname('.weekday-collapse-btn')
+        ),
+        expandBtnElement = domutil.closest(
+            target,
+            config.classname('.weekday-exceed-in-week')
+        ),
+        containsTarget = this.view.container.contains(target);
+    var blockElement, scheduleElement;
+    if (!containsTarget) {
+        return;
+    }
+
+    if (collapseBtnElement) {
+        /**
+         * click collpase btn event
+         * @events DayGridMouseOver#collapse
+         */
+        self.fire('collapse');
+
+        return;
+    }
+
+    if (expandBtnElement) {
+        this.view.setState({
+            clickedExpandBtnIndex: parseInt(domutil.getData(expandBtnElement, 'index'), 10)
+        });
+
+        /**
+         * click expand btn event
+         * @events DayGridMouseOver#expand
+         */
+        self.fire('expand');
+
+        return;
+    }
+
+    if (!dayGridScheduleView) {
+        return;
+    }
+
+    scheduleElement = domutil.closest(target, config.classname('.weekday-schedule'));
+    if (scheduleElement) {
+        blockElement = domutil.closest(target, config.classname('.weekday-schedule-block'));
+        scheduleCollection.doWhenHas(domutil.getData(blockElement, 'id'), function(schedule) {
+            /**
+             * @events DayGridMouseOver#hoverSchedule
+             * @type {object}
+             * @property {Schedule} schedule - schedule instance
+             * @property {MouseEvent} event - MouseEvent object
+             */
+            self.fire('mouseleave', {
+                schedule: schedule,
+                event: hoverEvent.originEvent
+            });
+        });
+    }
+};
+
+util.CustomEvents.mixin(DayGridMouseOver);
+
+module.exports = DayGridMouseOver;
+
+
+/***/ }),
+
+/***/ "./src/js/handler/time/mousemove.js":
+/*!******************************************!*\
+  !*** ./src/js/handler/time/mousemove.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * @fileoverview mouseover handle module for daygrid schedules
+ * @author Nghia Nguyen FE Development <nghiancqt@gmail.com>
+ */
+
+
+var util = __webpack_require__(/*! tui-code-snippet */ "tui-code-snippet");
+var config = __webpack_require__(/*! ../../config */ "./src/js/config.js");
+var domutil = __webpack_require__(/*! ../../common/domutil */ "./src/js/common/domutil.js");
+var DayGridMove = __webpack_require__(/*! ./move */ "./src/js/handler/time/move.js");
+
+/**
+ * @constructor
+ * @implements {Handler}
+ * @mixes CustomEvents
+ * @param {Drag} [dragHandler] - Drag handler instance.
+ * @param {DayGrid} [view] - daygrid view instance.
+ * @param {Base} [controller] - Base controller instance.
+ */
+function DayGridMouseOver(dragHandler, view, controller) {
+    /**
+     * @type {Drag}
+     */
+    this.dragHandler = dragHandler;
+
+    /**
+     * @type {DayGrid}
+     */
+    this.view = view;
+
+    /**
+     * @type {Base}
+     */
+    this.controller = controller;
+
+    dragHandler.on({
+        'mouseomove': this._onMouseMove
+    }, this);
+}
+
+/**
+ * Destroy handler module
+ */
+DayGridMouseOver.prototype.destroy = function() {
+    this.dragHandler.off(this);
+    this.view = this.controller = this.dragHandler = null;
+};
+
+/**
+ * Check target element is expected condition for activate this plugins.
+ * @param {HTMLElement} target - The element to check
+ * @returns {string} - model id
+ */
+DayGridMouseOver.prototype.checkExpectCondition = DayGridMove.prototype.checkExpectedCondition;
+
+/**
+ * Mouseover event handler
+ * @param {object} hoverEvent - click event data
+ * @emits DayGridMouseOver#clickSchedule
+ * @emits DayGridMouseOver#collapse
+ * @emits DayGridMouseOver#expand
+ */
+
+DayGridMouseOver.prototype._onMouseMove = function(hoverEvent) {
+    var self = this,
+        target = hoverEvent.target,
+        dayGridScheduleView = this.checkExpectCondition(target),
+        scheduleCollection = this.controller.schedules,
+        collapseBtnElement = domutil.closest(
+            target,
+            config.classname('.weekday-collapse-btn')
+        ),
+        expandBtnElement = domutil.closest(
+            target,
+            config.classname('.weekday-exceed-in-week')
+        ),
+        containsTarget = this.view.container.contains(target);
+    var blockElement, scheduleElement;
+
+    if (!containsTarget) {
+        return;
+    }
+
+    if (collapseBtnElement) {
+        /**
+         * click collpase btn event
+         * @events DayGridMouseOver#collapse
+         */
+        self.fire('collapse');
+
+        return;
+    }
+
+    if (expandBtnElement) {
+        this.view.setState({
+            clickedExpandBtnIndex: parseInt(domutil.getData(expandBtnElement, 'index'), 10)
+        });
+
+        /**
+         * click expand btn event
+         * @events DayGridMouseOver#expand
+         */
+        self.fire('expand');
+
+        return;
+    }
+
+    if (!dayGridScheduleView) {
+        return;
+    }
+
+    scheduleElement = domutil.closest(target, config.classname('.weekday-schedule'));
+    if (scheduleElement) {
+        blockElement = domutil.closest(target, config.classname('.weekday-schedule-block'));
+        scheduleCollection.doWhenHas(domutil.getData(blockElement, 'id'), function(schedule) {
+            /**
+             * @events DayGridMouseOver#hoverSchedule
+             * @type {object}
+             * @property {Schedule} schedule - schedule instance
+             * @property {MouseEvent} event - MouseEvent object
+             */
+            self.fire('mousemove', {
+                schedule: schedule,
+                event: hoverEvent.originEvent
+            });
+        });
+    }
+};
+
+util.CustomEvents.mixin(DayGridMouseOver);
+
+module.exports = DayGridMouseOver;
+
 
 /***/ }),
 
@@ -18124,6 +18555,8 @@ var theme = {
     'week.timegridOneHour.height': '52px',
     'week.timegridHalfHour.height': '26px',
     'week.timegridHalfHour.borderBottom': 'none',
+    'week.timegridQuarterHour.height': '13px',
+    'week.timegridQuarterHour.borderBottom': 'none',
     'week.timegridHorizontalLine.borderBottom': '1px solid #e5e5e5',
 
     'week.timegrid.paddingRight': '8px',
@@ -18494,6 +18927,8 @@ var themeConfig = {
     'week.timegridOneHour.height': '52px',
     'week.timegridHalfHour.height': '26px',
     'week.timegridHalfHour.borderBottom': 'none',
+    'week.timegridQuarterHour.height': '13px',
+    'week.timegridQuarterHour.borderBottom': 'none',
     'week.timegridHorizontalLine.borderBottom': '1px solid #e5e5e5',
 
     'week.timegrid.paddingRight': '8px',
@@ -20763,15 +21198,15 @@ var helpers = {
         return Handlebars.helpers['timegridDisplayPrimaryTime-tmpl'](time);
     },
 
-    'timegridDisplayPrimaryTime-tmpl': function(time) {
+    'timegridDisplayPrimaryTime-tmpl': function(time, isHaftTime) {
         var hour = time.hour;
+        var minute = isHaftTime === true ? '30' : '00';
         var meridiem = hour >= 12 ? 'pm' : 'am';
-
         if (hour > 12) {
             hour = hour - 12;
         }
 
-        return hour + ' ' + meridiem;
+        return hour + ':' + minute + ' ' + meridiem;
     },
 
     'timegridDisplayTime-tmpl': function(time) {
@@ -22357,8 +22792,10 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":6,"column":20},"end":{"line":6,"column":34}}}) : helper)))
     + "time-date-schedule-block "
     + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isPending : stack1),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":59},"end":{"line":6,"column":136}}})) != null ? stack1 : "")
+    + " "
+    + alias4(alias5(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.dueDateClass : stack1), depth0))
     + "\" data-id=\""
-    + alias4((helpers.stamp||(depth0 && depth0.stamp)||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"stamp","hash":{},"data":data,"loc":{"start":{"line":6,"column":147},"end":{"line":6,"column":162}}}))
+    + alias4((helpers.stamp||(depth0 && depth0.stamp)||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"stamp","hash":{},"data":data,"loc":{"start":{"line":6,"column":170},"end":{"line":6,"column":185}}}))
     + "\"\n            style=\""
     + alias4((helpers["time-scheduleBlock"]||(depth0 && depth0["time-scheduleBlock"])||alias2).call(alias1,depth0,{"name":"time-scheduleBlock","hash":{},"data":data,"loc":{"start":{"line":7,"column":19},"end":{"line":7,"column":46}}}))
     + ";\n"
@@ -22549,30 +22986,46 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "; background-color: "
     + alias4(((helper = (helper = helpers.backgroundColor || (depth0 != null ? depth0.backgroundColor : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"backgroundColor","hash":{},"data":data,"loc":{"start":{"line":3,"column":257},"end":{"line":3,"column":276}}}) : helper)))
     + ";\" >\n"
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isPrimary : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.program(10, data, 0),"data":data,"loc":{"start":{"line":4,"column":8},"end":{"line":26,"column":15}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isPrimary : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.program(10, data, 0),"data":data,"loc":{"start":{"line":4,"column":8},"end":{"line":28,"column":15}}})) != null ? stack1 : "")
     + "        </div>\n";
 },"2":function(container,depth0,helpers,partials,data) {
     return "display:none;";
 },"4":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {});
 
-  return ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timeSlots : depth0),{"name":"each","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":12},"end":{"line":9,"column":23}}})) != null ? stack1 : "")
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (data && data.root)) && stack1.showHourMarker),{"name":"if","hash":{},"fn":container.program(8, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":10,"column":12},"end":{"line":14,"column":19}}})) != null ? stack1 : "");
+  return ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timeSlots : depth0),{"name":"each","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":12},"end":{"line":10,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (data && data.root)) && stack1.showHourMarker),{"name":"if","hash":{},"fn":container.program(8, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":11,"column":12},"end":{"line":15,"column":19}}})) != null ? stack1 : "");
 },"5":function(container,depth0,helpers,partials,data) {
-    var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
+    var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "<div class=\""
     + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":6,"column":28},"end":{"line":6,"column":42}}}) : helper)))
     + "timegrid-hour\" style=\"height: "
-    + alias4(container.lambda(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.oneHourHeight), depth0))
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.oneHourHeight), depth0))
     + "; color: "
     + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":6,"column":111},"end":{"line":6,"column":120}}}) : helper)))
     + "; font-weight: "
     + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":6,"column":135},"end":{"line":6,"column":149}}}) : helper)))
     + ";\">\n                    <span style=\""
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hidden : depth0),{"name":"if","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":33},"end":{"line":7,"column":66}}})) != null ? stack1 : "")
-    + "\">"
-    + ((stack1 = (helpers["timegridDisplayPrimayTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimayTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridDisplayPrimayTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":7,"column":68},"end":{"line":7,"column":109}}})) != null ? stack1 : "")
+    + "; height: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
+    + "; color: "
+    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":7,"column":116},"end":{"line":7,"column":125}}}) : helper)))
+    + "; font-weight: "
+    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":7,"column":140},"end":{"line":7,"column":154}}}) : helper)))
+    + ";\">"
+    + ((stack1 = (helpers["timegridDisplayPrimaryTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimaryTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridDisplayPrimaryTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":7,"column":157},"end":{"line":7,"column":199}}})) != null ? stack1 : "")
+    + "</span>\n                    <span style=\"margin-top: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
+    + "; height: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
+    + "; color: "
+    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":8,"column":126},"end":{"line":8,"column":135}}}) : helper)))
+    + "; font-weight: "
+    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":8,"column":150},"end":{"line":8,"column":164}}}) : helper)))
+    + ";\">"
+    + ((stack1 = (helpers["timegridDisplayPrimaryTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimaryTime-tmpl"])||alias2).call(alias1,depth0,true,{"name":"timegridDisplayPrimaryTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":8,"column":167},"end":{"line":8,"column":214}}})) != null ? stack1 : "")
     + "</span>\n                </div>\n";
 },"6":function(container,depth0,helpers,partials,data) {
     return "display:none";
@@ -22580,7 +23033,7 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "                <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":11,"column":28},"end":{"line":11,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":12,"column":28},"end":{"line":12,"column":42}}}) : helper)))
     + "timegrid-hourmarker\" style=\"top:"
     + alias4(alias5(((stack1 = (data && data.root)) && stack1.hourmarkerTop), depth0))
     + "%; margin-top: calc(6px - "
@@ -22588,7 +23041,7 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "); height: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
     + ";\">\n                    <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":12,"column":32},"end":{"line":12,"column":46}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":13,"column":32},"end":{"line":13,"column":46}}}) : helper)))
     + "timegrid-hourmarker-time\" style=\"color: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.currentTimeColor), depth0))
     + "; font-size: "
@@ -22596,34 +23049,34 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "; font-weight: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.currentTimeFontWeight), depth0))
     + "\">"
-    + ((stack1 = (helpers["timegridCurrentTime-tmpl"]||(depth0 && depth0["timegridCurrentTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridCurrentTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":12,"column":223},"end":{"line":12,"column":258}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["timegridCurrentTime-tmpl"]||(depth0 && depth0["timegridCurrentTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridCurrentTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":13,"column":223},"end":{"line":13,"column":258}}})) != null ? stack1 : "")
     + "</div>\n                </div>\n";
 },"10":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {});
 
-  return ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timeSlots : depth0),{"name":"each","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":16,"column":12},"end":{"line":20,"column":23}}})) != null ? stack1 : "")
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (data && data.root)) && stack1.showHourMarker),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":21,"column":12},"end":{"line":25,"column":19}}})) != null ? stack1 : "");
+  return ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timeSlots : depth0),{"name":"each","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":17,"column":12},"end":{"line":22,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (data && data.root)) && stack1.showHourMarker),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":23,"column":12},"end":{"line":27,"column":19}}})) != null ? stack1 : "");
 },"11":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "<div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":17,"column":28},"end":{"line":17,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":18,"column":28},"end":{"line":18,"column":42}}}) : helper)))
     + "timegrid-hour\" style=\"height: "
     + alias4(container.lambda(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.oneHourHeight), depth0))
     + "; color: "
-    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":17,"column":111},"end":{"line":17,"column":120}}}) : helper)))
+    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":18,"column":111},"end":{"line":18,"column":120}}}) : helper)))
     + "; font-weight: "
-    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":17,"column":135},"end":{"line":17,"column":149}}}) : helper)))
+    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":18,"column":135},"end":{"line":18,"column":149}}}) : helper)))
     + ";\">\n                    <span style=\""
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hidden : depth0),{"name":"if","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":18,"column":33},"end":{"line":18,"column":66}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hidden : depth0),{"name":"if","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":19,"column":33},"end":{"line":19,"column":66}}})) != null ? stack1 : "")
     + "\">"
-    + ((stack1 = (helpers["timegridDisplayTime-tmpl"]||(depth0 && depth0["timegridDisplayTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridDisplayTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":18,"column":68},"end":{"line":18,"column":103}}})) != null ? stack1 : "")
-    + "</span>\n                </div>\n";
+    + ((stack1 = (helpers["timegridDisplayTime-tmpl"]||(depth0 && depth0["timegridDisplayTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridDisplayTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":19,"column":68},"end":{"line":19,"column":103}}})) != null ? stack1 : "")
+    + "</span>\n\n                </div>\n";
 },"13":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "                <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":22,"column":28},"end":{"line":22,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":24,"column":28},"end":{"line":24,"column":42}}}) : helper)))
     + "timegrid-hourmarker\" style=\"top:"
     + alias4(alias5(((stack1 = (data && data.root)) && stack1.hourmarkerTop), depth0))
     + "%; margin-top: calc(6px - "
@@ -22631,29 +23084,41 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "); height: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
     + ";\">\n                    <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":23,"column":32},"end":{"line":23,"column":46}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":25,"column":32},"end":{"line":25,"column":46}}}) : helper)))
     + "timegrid-hourmarker-time\" style=\"color: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.currentTimeColor), depth0))
     + "; font-size: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.currentTimeFontSize), depth0))
     + ";\">"
-    + ((stack1 = (helpers["timegridCurrentTime-tmpl"]||(depth0 && depth0["timegridCurrentTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridCurrentTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":23,"column":171},"end":{"line":23,"column":206}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["timegridCurrentTime-tmpl"]||(depth0 && depth0["timegridCurrentTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridCurrentTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":25,"column":171},"end":{"line":25,"column":206}}})) != null ? stack1 : "")
     + "</div>\n                </div>\n";
 },"15":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "<div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":33,"column":20},"end":{"line":33,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":35,"column":20},"end":{"line":35,"column":34}}}) : helper)))
     + "timegrid-gridline\" style=\"height: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.oneHourHeight), depth0))
     + ";\n"
-    + ((stack1 = helpers.unless.call(alias1,(data && data.last),{"name":"unless","hash":{},"fn":container.program(16, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":34,"column":12},"end":{"line":36,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.unless.call(alias1,(data && data.last),{"name":"unless","hash":{},"fn":container.program(16, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":36,"column":12},"end":{"line":38,"column":23}}})) != null ? stack1 : "")
     + "        \">\n            <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":38,"column":24},"end":{"line":38,"column":38}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":40,"column":24},"end":{"line":40,"column":38}}}) : helper)))
     + "timegrid-gridline-half\" style=\"height: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
     + "; border-bottom: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourBorderBottom), depth0))
+    + ";\">\n                <div class=\""
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":41,"column":28},"end":{"line":41,"column":42}}}) : helper)))
+    + "timegrid-gridline-quarter\" style=\"height: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.quarterHourHeight), depth0))
+    + "; border-bottom: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.quarterHourBorderBottom), depth0))
+    + ";\"></div>\n\n            </div>\n            <div class=\""
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":44,"column":24},"end":{"line":44,"column":38}}}) : helper)))
+    + "timegrid-gridline-quarter\" style=\"height: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.quarterHourHeight), depth0))
+    + "; border-bottom: "
+    + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.quarterHourBorderBottom), depth0))
     + ";\"></div>\n        </div>\n";
 },"16":function(container,depth0,helpers,partials,data) {
     var stack1;
@@ -22665,33 +23130,33 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "    <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":47,"column":16},"end":{"line":47,"column":30}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":53,"column":16},"end":{"line":53,"column":30}}}) : helper)))
     + "timegrid-hourmarker\" style=\"top:"
-    + alias4(((helper = (helper = helpers.hourmarkerTop || (depth0 != null ? depth0.hourmarkerTop : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"hourmarkerTop","hash":{},"data":data,"loc":{"start":{"line":47,"column":62},"end":{"line":47,"column":79}}}) : helper)))
+    + alias4(((helper = (helper = helpers.hourmarkerTop || (depth0 != null ? depth0.hourmarkerTop : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"hourmarkerTop","hash":{},"data":data,"loc":{"start":{"line":53,"column":62},"end":{"line":53,"column":79}}}) : helper)))
     + "%\">\n        <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":48,"column":20},"end":{"line":48,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":54,"column":20},"end":{"line":54,"column":34}}}) : helper)))
     + "timegrid-hourmarker-line-left\" style=\"width:"
-    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":48,"column":78},"end":{"line":48,"column":97}}}) : helper)))
+    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":54,"column":78},"end":{"line":54,"column":97}}}) : helper)))
     + "%; border-top: "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.currentTimeLeftBorderTop : stack1), depth0))
     + ";\"></div>\n        <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":49,"column":20},"end":{"line":49,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":55,"column":20},"end":{"line":55,"column":34}}}) : helper)))
     + "timegrid-todaymarker\" style=\"left:"
-    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":49,"column":68},"end":{"line":49,"column":87}}}) : helper)))
+    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":55,"column":68},"end":{"line":55,"column":87}}}) : helper)))
     + "%; background-color: "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.currentTimeBulletBackgroundColor : stack1), depth0))
     + "; \">today</div>\n        <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":50,"column":20},"end":{"line":50,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":56,"column":20},"end":{"line":56,"column":34}}}) : helper)))
     + "timegrid-hourmarker-line-today\" style=\"left:"
-    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":50,"column":78},"end":{"line":50,"column":97}}}) : helper)))
+    + alias4(((helper = (helper = helpers.todaymarkerLeft || (depth0 != null ? depth0.todaymarkerLeft : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerLeft","hash":{},"data":data,"loc":{"start":{"line":56,"column":78},"end":{"line":56,"column":97}}}) : helper)))
     + "%; width: "
-    + alias4(((helper = (helper = helpers.todaymarkerWidth || (depth0 != null ? depth0.todaymarkerWidth : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerWidth","hash":{},"data":data,"loc":{"start":{"line":50,"column":107},"end":{"line":50,"column":127}}}) : helper)))
+    + alias4(((helper = (helper = helpers.todaymarkerWidth || (depth0 != null ? depth0.todaymarkerWidth : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerWidth","hash":{},"data":data,"loc":{"start":{"line":56,"column":107},"end":{"line":56,"column":127}}}) : helper)))
     + "%; border-top: "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.currentTimeTodayBorderTop : stack1), depth0))
     + ";\"></div>\n        <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":51,"column":20},"end":{"line":51,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":57,"column":20},"end":{"line":57,"column":34}}}) : helper)))
     + "timegrid-hourmarker-line-right\" style=\"left:"
-    + alias4(((helper = (helper = helpers.todaymarkerRight || (depth0 != null ? depth0.todaymarkerRight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerRight","hash":{},"data":data,"loc":{"start":{"line":51,"column":78},"end":{"line":51,"column":98}}}) : helper)))
+    + alias4(((helper = (helper = helpers.todaymarkerRight || (depth0 != null ? depth0.todaymarkerRight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"todaymarkerRight","hash":{},"data":data,"loc":{"start":{"line":57,"column":78},"end":{"line":57,"column":98}}}) : helper)))
     + "%; border-top: "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.currentTimeRightBorderTop : stack1), depth0))
     + ";\"></div>\n    </div>\n";
@@ -22705,21 +23170,21 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "; font-size: "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.leftFontSize : stack1), depth0))
     + ";\">\n"
-    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timezones : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":4},"end":{"line":28,"column":15}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.timezones : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":4},"end":{"line":30,"column":15}}})) != null ? stack1 : "")
     + "</div>\n<div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":30,"column":12},"end":{"line":30,"column":26}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":32,"column":12},"end":{"line":32,"column":26}}}) : helper)))
     + "timegrid-right\" style=\"margin-left: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.leftWidth), depth0))
     + ";\">\n    <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":31,"column":16},"end":{"line":31,"column":30}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":33,"column":16},"end":{"line":33,"column":30}}}) : helper)))
     + "timegrid-h-grid\">\n"
-    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.hoursLabels : depth0),{"name":"each","hash":{},"fn":container.program(15, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":32,"column":8},"end":{"line":40,"column":19}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.hoursLabels : depth0),{"name":"each","hash":{},"fn":container.program(15, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":34,"column":8},"end":{"line":46,"column":19}}})) != null ? stack1 : "")
     + "</div>\n    <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":42,"column":16},"end":{"line":42,"column":30}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":48,"column":16},"end":{"line":48,"column":30}}}) : helper)))
     + "timegrid-schedules\">\n        <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":43,"column":20},"end":{"line":43,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":49,"column":20},"end":{"line":49,"column":34}}}) : helper)))
     + "timegrid-schedules-container\"></div>\n    </div>\n\n"
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.showHourMarker : depth0),{"name":"if","hash":{},"fn":container.program(18, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":46,"column":4},"end":{"line":53,"column":11}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.showHourMarker : depth0),{"name":"if","hash":{},"fn":container.program(18, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":52,"column":4},"end":{"line":59,"column":11}}})) != null ? stack1 : "")
     + "</div>\n";
 },"useData":true});
 
@@ -24165,7 +24630,6 @@ function getHoursLabels(opt, hasHourMarker, timezoneOffset, styles) {
         var fontWeight;
         var isPast = (hasHourMarker && index <= nowHoursIndex) ||
                      (renderEndDate < now && !datetime.isSameDate(renderEndDate, now));
-
         if (isPast) {
             // past
             color = styles.pastTimeColor;
@@ -24213,7 +24677,6 @@ function TimeGrid(name, options, panelElement) {
     name = name || 'time';
 
     View.call(this, container);
-
     if (!util.browser.safari) {
         /**
          * @type {AutoScroll}
@@ -24474,11 +24937,9 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     this.children.clear();
 
     containerHeight = domutil.getSize(container.parentElement)[1];
-
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
         isToday = ymd === today;
-
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
@@ -24702,6 +25163,7 @@ TimeGrid.prototype._getStyles = function(theme, timezonesCollapsed) {
     if (theme) {
         styles.borderBottom = theme.week.timegridHorizontalLine.borderBottom || theme.common.border;
         styles.halfHourBorderBottom = theme.week.timegridHalfHour.borderBottom || theme.common.border;
+        styles.quarterHourBorderBottom = theme.week.timegridQuarterHour.borderBottom || theme.common.border;
 
         styles.todayBackgroundColor = theme.week.today.backgroundColor;
         styles.weekendBackgroundColor = theme.week.weekend.backgroundColor;
@@ -24719,7 +25181,7 @@ TimeGrid.prototype._getStyles = function(theme, timezonesCollapsed) {
 
         styles.oneHourHeight = theme.week.timegridOneHour.height;
         styles.halfHourHeight = theme.week.timegridHalfHour.height;
-        styles.quaterHourHeight = (parseInt(styles.halfHourHeight, 10) / 2) + 'px';
+        styles.quarterHourHeight = (parseInt(styles.halfHourHeight, 10) / 2) + 'px';
 
         styles.currentTimeColor = theme.week.currentTime.color;
         styles.currentTimeFontSize = theme.week.currentTime.fontSize;

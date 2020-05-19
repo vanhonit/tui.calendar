@@ -4,7 +4,8 @@
         {{#if isPrimary}}
             {{#each timeSlots ~}}
                 <div class="{{CSS_PREFIX}}timegrid-hour" style="height: {{@root.styles.oneHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">
-                    <span style="{{#if hidden}}display:none{{/if}}">{{{timegridDisplayPrimayTime-tmpl this}}}</span>
+                    <span style="{{#if hidden}}display:none{{/if}}; height: {{@root.styles.halfHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">{{{timegridDisplayPrimaryTime-tmpl this}}}</span>
+                    <span style="margin-top: {{@root.styles.halfHourHeight}}; height: {{@root.styles.halfHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">{{{timegridDisplayPrimaryTime-tmpl this true}}}</span>
                 </div>
             {{/each ~}}
             {{#if @root.showHourMarker}}
@@ -16,6 +17,7 @@
             {{#each timeSlots ~}}
                 <div class="{{CSS_PREFIX}}timegrid-hour" style="height: {{@root.styles.oneHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">
                     <span style="{{#if hidden}}display:none{{/if}}">{{{timegridDisplayTime-tmpl this}}}</span>
+
                 </div>
             {{/each ~}}
             {{#if @root.showHourMarker}}
@@ -35,7 +37,11 @@
             border-bottom: {{@root.styles.borderBottom}};
             {{/unless}}
         ">
-            <div class="{{CSS_PREFIX}}timegrid-gridline-half" style="height: {{@root.styles.halfHourHeight}}; border-bottom: {{@root.styles.halfHourBorderBottom}};"></div>
+            <div class="{{CSS_PREFIX}}timegrid-gridline-half" style="height: {{@root.styles.halfHourHeight}}; border-bottom: {{@root.styles.halfHourBorderBottom}};">
+                <div class="{{CSS_PREFIX}}timegrid-gridline-quarter" style="height: {{@root.styles.quarterHourHeight}}; border-bottom: {{@root.styles.quarterHourBorderBottom}};"></div>
+
+            </div>
+            <div class="{{CSS_PREFIX}}timegrid-gridline-quarter" style="height: {{@root.styles.quarterHourHeight}}; border-bottom: {{@root.styles.quarterHourBorderBottom}};"></div>
         </div>
         {{/each ~}}
     </div>

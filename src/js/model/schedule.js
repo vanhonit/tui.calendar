@@ -154,6 +154,12 @@ function Schedule() {
     this.isPrivate = false;
 
     /**
+     * private schedule
+     * @type {boolean}
+     */
+    this.isDueDate = false;
+
+    /**
      * location
      * @type {string}
      */
@@ -252,6 +258,7 @@ Schedule.prototype.init = function(options) {
     this.attendees = options.attendees || [];
     this.recurrenceRule = options.recurrenceRule || '';
     this.isPrivate = options.isPrivate || false;
+    this.isDueDate = options.isDueDate || false;
     this.isPending = options.isPending || false;
     this.isFocused = options.isFocused || false;
     this.isReadOnly = options.isReadOnly || false;

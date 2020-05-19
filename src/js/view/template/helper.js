@@ -127,6 +127,7 @@ var helpers = {
             left = getElSize(viewModel.left, '%', 'left'),
             width = getElSize(viewModel.width, '%', 'width'),
             height = getElSize(viewModel.height, 'px', 'height');
+        console.log(viewModel);
 
         return [top, left, width, height].join(';');
     },
@@ -364,15 +365,15 @@ var helpers = {
         return Handlebars.helpers['timegridDisplayPrimaryTime-tmpl'](time);
     },
 
-    'timegridDisplayPrimaryTime-tmpl': function(time) {
+    'timegridDisplayPrimaryTime-tmpl': function(time, isHaftTime) {
         var hour = time.hour;
+        var minute = isHaftTime === true ? '30' : '00';
         var meridiem = hour >= 12 ? 'pm' : 'am';
-
         if (hour > 12) {
             hour = hour - 12;
         }
 
-        return hour + ' ' + meridiem;
+        return hour + ':' + minute + ' ' + meridiem;
     },
 
     'timegridDisplayTime-tmpl': function(time) {

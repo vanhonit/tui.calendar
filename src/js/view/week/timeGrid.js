@@ -73,7 +73,6 @@ function getHoursLabels(opt, hasHourMarker, timezoneOffset, styles) {
         var fontWeight;
         var isPast = (hasHourMarker && index <= nowHoursIndex) ||
                      (renderEndDate < now && !datetime.isSameDate(renderEndDate, now));
-
         if (isPast) {
             // past
             color = styles.pastTimeColor;
@@ -121,7 +120,6 @@ function TimeGrid(name, options, panelElement) {
     name = name || 'time';
 
     View.call(this, container);
-
     if (!util.browser.safari) {
         /**
          * @type {AutoScroll}
@@ -130,7 +128,6 @@ function TimeGrid(name, options, panelElement) {
     }
 
     this.stickyContainer = stickyContainer;
-
     /**
      * Time view options.
      * @type {object}
@@ -143,7 +140,8 @@ function TimeGrid(name, options, panelElement) {
         hourEnd: 24,
         timezones: options.timezones,
         isReadOnly: options.isReadOnly,
-        showTimezoneCollapseButton: false
+        showTimezoneCollapseButton: false,
+        startDisableGrid: options.startDisableGrid
     }, options.week);
 
     if (this.options.timezones.length < 1) {
@@ -375,18 +373,17 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
         isToday,
         containerHeight,
         today = datetime.format(new TZDate(), 'YYYYMMDD'),
+        isDisableGrid,
         i = 0;
 
     // clear contents
     container.innerHTML = '';
     this.children.clear();
-
     containerHeight = domutil.getSize(container.parentElement)[1];
-
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
         isToday = ymd === today;
-
+        isDisableGrid = Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD'));
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
@@ -397,9 +394,10 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
             isFocused: options.isFocused,
             isReadOnly: options.isReadOnly,
             hourStart: options.hourStart,
-            hourEnd: options.hourEnd
+            hourEnd: options.hourEnd,
+            isDisableGrid: isDisableGrid
         };
-
+        // console.log(childOption);
         child = new Time(
             childOption,
             domutil.appendHTMLElement('div', container, config.classname('time-date')),
@@ -610,6 +608,7 @@ TimeGrid.prototype._getStyles = function(theme, timezonesCollapsed) {
     if (theme) {
         styles.borderBottom = theme.week.timegridHorizontalLine.borderBottom || theme.common.border;
         styles.halfHourBorderBottom = theme.week.timegridHalfHour.borderBottom || theme.common.border;
+        styles.quarterHourBorderBottom = theme.week.timegridQuarterHour.borderBottom || theme.common.border;
 
         styles.todayBackgroundColor = theme.week.today.backgroundColor;
         styles.weekendBackgroundColor = theme.week.weekend.backgroundColor;
@@ -627,7 +626,7 @@ TimeGrid.prototype._getStyles = function(theme, timezonesCollapsed) {
 
         styles.oneHourHeight = theme.week.timegridOneHour.height;
         styles.halfHourHeight = theme.week.timegridHalfHour.height;
-        styles.quaterHourHeight = (parseInt(styles.halfHourHeight, 10) / 2) + 'px';
+        styles.quarterHourHeight = (parseInt(styles.halfHourHeight, 10) / 2) + 'px';
 
         styles.currentTimeColor = theme.week.currentTime.color;
         styles.currentTimeFontSize = theme.week.currentTime.fontSize;

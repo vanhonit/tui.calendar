@@ -29,7 +29,6 @@ var SCHEDULE_MIN_DURATION = datetime.MILLISECONDS_SCHEDULE_MIN_DURATION;
  */
 function Time(options, container, theme) {
     View.call(this, container);
-
     this.options = util.extend({
         index: 0,
         width: 0,
@@ -42,7 +41,6 @@ function Time(options, container, theme) {
         minHeight: 18.5,
         isReadOnly: false
     }, options);
-
     this.timeTmpl = timeTmpl;
 
     /**
@@ -120,6 +118,7 @@ Time.prototype._getScheduleViewBoundY = function(viewModel, options) {
     var goingDurationHeight;
     var modelDurationHeight;
     var comingDurationHeight;
+    var isDueDate = viewModel.model ? viewModel.model.isDueDate : false;
 
     modelDuration = modelDuration > SCHEDULE_MIN_DURATION ? modelDuration : SCHEDULE_MIN_DURATION;
     duration = modelDuration + goingDuration + comingDuration;
@@ -135,7 +134,7 @@ Time.prototype._getScheduleViewBoundY = function(viewModel, options) {
         croppedStart = true;
     }
 
-    if (height + top > baseHeight) {
+    if (height + top > baseHeight || isDueDate) {
         height = baseHeight - top;
         croppedEnd = true;
     }
@@ -170,6 +169,7 @@ Time.prototype.getScheduleViewBound = function(viewModel, options) {
     var boundY = this._getScheduleViewBoundY(viewModel, options);
     var schedule = viewModel.model;
     var isReadOnly = util.pick(schedule, 'isReadOnly') || false;
+    var isDisableGrid = util.pick(schedule, 'isDisableGrid') || false;
     var travelBorderColor = schedule.isFocused ? '#ffffff' : schedule.borderColor;
     if (travelBorderColor === schedule.bgColor) {
         travelBorderColor = null; // follow text color
@@ -177,7 +177,8 @@ Time.prototype.getScheduleViewBound = function(viewModel, options) {
 
     return util.extend({
         isReadOnly: isReadOnly,
-        travelBorderColor: travelBorderColor
+        travelBorderColor: travelBorderColor,
+        isDisableGrid: isDisableGrid
     }, boundX, boundY);
 };
 
@@ -193,6 +194,7 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
         hourStart = options.hourStart,
         hourEnd = options.hourEnd,
         isReadOnly = options.isReadOnly,
+        isDisableGrid = options.isDisableGrid,
         todayStart,
         baseMS;
 
@@ -204,7 +206,6 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
     todayStart = this._parseDateGroup(ymd);
     todayStart.setHours(hourStart);
     baseMS = datetime.millisecondsFrom('hour', (hourEnd - hourStart));
-
     forEachArr(matrices, function(matrix) {
         var maxRowLength,
             widthPercent,
@@ -237,7 +238,8 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
                     baseWidth: widthPercent,
                     baseHeight: containerHeight,
                     columnIndex: col,
-                    isReadOnly: isReadOnly
+                    isReadOnly: isReadOnly,
+                    isDisableGrid: isDisableGrid
                 });
 
                 util.extend(viewModel, viewBound);
@@ -261,10 +263,12 @@ Time.prototype.getDate = function() {
  */
 Time.prototype.render = function(ymd, matrices, containerHeight) {
     this._getBaseViewModel(ymd, matrices, containerHeight);
+    console.log(matrices);
     this.container.innerHTML = this.timeTmpl({
         matrices: matrices,
         styles: this._getStyles(this.theme),
-        isReadOnly: this.options.isReadOnly
+        isReadOnly: this.options.isReadOnly,
+        isDisableGrid: this.options.isDisableGrid
     });
 };
 

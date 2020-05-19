@@ -217,6 +217,8 @@ var themeConfig = {
     'week.timegridOneHour.height': '52px',
     'week.timegridHalfHour.height': '26px',
     'week.timegridHalfHour.borderBottom': 'none',
+    'week.timegridQuarterHour.height': '13px',
+    'week.timegridQuarterHour.borderBottom': 'none',
     'week.timegridHorizontalLine.borderBottom': '1px solid #e5e5e5',
 
     'week.timegrid.paddingRight': '8px',

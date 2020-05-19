@@ -17,7 +17,32 @@
         defaultView: 'week',
         useCreationPopup: useCreationPopup,
         useDetailPopup: useDetailPopup,
-        calendars: CalendarList,
+        // calendars: CalendarList,
+        calendars: [
+            {
+                id: '0',
+                name: 'Available Time',
+                bgColor: 'rgba(47, 47, 47, .1)',
+                borderColor: '',
+                color: 'white'
+            },
+            {
+                id: '1',
+                name: 'Course',
+                bgColor: '#ffffff'
+            },
+            {
+                id: '2',
+                name: 'Study Hall',
+                bgColor: '#ffffff'
+            },
+            {
+                id: '3',
+                name: 'Non Study',
+                color: '#43425d',
+                bgColor: '#ffffff'
+            }
+        ],
         template: {
             milestone: function(model) {
                 return '<span class="calendar-font-icon ic-milestone-b"></span> <span style="background-color: ' + model.bgColor + '">' + model.title + '</span>';
@@ -36,22 +61,30 @@
         },
         theme: {
             'week.timegridOneHour.height': '200px',
-            'week.timegridHalfHour.height': '100px'
+            'week.timegridHalfHour.height': '100px',
+            'week.timegridHalfHour.borderBottom': '1px solid #ecedf0',
+            'week.timegridQuarterHour.height': '50px',
+            'week.timegridQuarterHour.borderBottom': '1px solid #ecedf0',
+            'week.timegrid.paddingRight': '0px'
         },
         scheduleView: ['time'],
         taskView: false,
         disableClick: true,
         disableDblClick: true,
-        showCreationGuideOnHover: true,
+        startDisableGrid: moment().add(2, 'days').add(15, 'minutes').toISOString(),
+        showCreationGuideOnHover: false,
         customCheckExpectedCondition: function(time) { //eslint-disable-line
             // console.log(new Date(time.timeY), availableTime);
 
             return {
                 endTime: new Date().setHours(new Date().getHours() + (Math.floor(Math.random() * 2) + 1))
             };
+        },
+        week: {
+            hourStart: 7,
+            hourEnd: 21,
+            daynames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         }
-
-        // isReadOnly: true
     });
 
     // event handlers
@@ -60,6 +93,11 @@
             console.log('clickMore', e);
         },
         'clickSchedule': function(e) {
+            var element;
+            if (e.schedule.isDueDate) {
+                element = document.getElementsByClassName('tui-full-calendar-popup-detail');
+                element[0].parentNode.removeChild(element[0]);
+            }
             console.log('clickSchedule', e);
         },
         'clickDayname': function(date) {
@@ -198,7 +236,7 @@
 
         setDropdownCalendarType();
         setRenderRangeText();
-        setSchedules();
+        // setSchedules();
     }
 
     function onClickNavi(e) {
@@ -416,14 +454,113 @@
     }
 
     function setSchedules() {
+        // generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
+        // cal.createSchedules(ScheduleList);
+        var schedules = [
+            {
+                id: '1',
+                calendarId: '1',
+                raw: {
+                    isAvailableTime: true
+                },
+                title: 'Available Time',
+                category: 'time',
+                dueDateClass: '',
+                start: moment().toISOString(),
+                end: moment().add(1, 'hours').toISOString(),
+                isReadOnly: true,
+                borderColor: '#2eabff',
+                color: '#2eabff'
+            },
+            {
+                id: '1',
+                calendarId: '3',
+                title: 'Lunch (Non-Study)',
+                category: 'time',
+                dueDateClass: '',
+                start: moment().add(1, 'days').toISOString(),
+                end: moment().add(1, 'days').add(1, 'hours').toISOString(),
+                isReadOnly: true,
+                color: '#8e8e8e'
+            },
+            {
+                id: '2',
+                calendarId: '1',
+                raw: {
+                    courseId: 1
+                },
+                category: 'time',
+                title: 'Practice',
+                dueDateClass: '',
+                start: moment().add(2, 'days').toISOString(),
+                end: moment().add(2, 'days').add(15, 'minutes').toISOString(),
+                isReadOnly: true
+            },
+            {
+                id: '21',
+                calendarId: '0',
+                raw: {
+                    courseId: 1
+                },
+                category: 'time',
+                title: 'Practice ggggg',
+                dueDateClass: 'due-date-start',
+                isDueDate: true,
+                start: moment().add(2, 'days').add(15, 'minutes').toISOString(),
+                end: moment().add(2, 'days').add(30, 'minutes').toISOString(),
+                isReadOnly: true
+            },
+            {
+                id: '21',
+                calendarId: '1',
+                raw: {
+                    courseId: 1
+                },
+                category: 'time',
+                title: 'Practice ggggg',
+                start: moment().add(2, 'days').add(40, 'minutes').toISOString(),
+                end: moment().add(2, 'days').add(60, 'minutes').toISOString(),
+                isReadOnly: false
+            },
+            {
+                id: '3',
+                calendarId: '1',
+                title: 'FE Workshop',
+                category: 'time',
+                dueDateClass: '',
+                start: moment().subtract(2, 'hours').toISOString(),
+                end: moment().subtract(1, 'hours').toISOString(),
+                isReadOnly: true,
+                bgColor: '#ffffff',
+                borderColor: '#685a7f',
+                color: '#685a7f'
+            },
+            {
+                id: '4',
+                calendarId: '1',
+                title: 'Report',
+                category: 'time',
+                dueDateClass: '',
+                start: moment().add(3, 'days').toISOString(),
+                end: moment().add(3, 'days').add(1, 'hours').toISOString(),
+                isReadOnly: true
+            },
+            {
+                id: '4',
+                calendarId: '2',
+                raw: {
+                    isStudyHall: true
+                },
+                title: 'Study Hall',
+                category: 'time',
+                dueDateClass: '',
+                start: moment().subtract(1, 'hours').toISOString(),
+                end: moment().subtract(15, 'minutes').toISOString()
+            }
+        ];
         cal.clear();
-        generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
-        cal.createSchedules(ScheduleList);
-        // var schedules = [
-        //     {id: 489273, title: 'Workout for 2019-04-05', isAllDay: false, start: '2018-02-01T11:30:00+09:00', end: '2018-02-01T12:00:00+09:00', goingDuration: 30, comingDuration: 30, color: '#ffffff', isVisible: true, bgColor: '#69BB2D', dragBgColor: '#69BB2D', borderColor: '#69BB2D', calendarId: 'logged-workout', category: 'time', dueDateClass: '', customStyle: 'cursor: default;', isPending: false, isFocused: false, isReadOnly: true, isPrivate: false, location: '', attendees: '', recurrenceRule: '', state: ''},
-        //     // {id: 18073, title: 'completed with blocks', isAllDay: false, start: '2018-11-17T09:00:00+09:00', end: '2018-11-17T10:00:00+09:00', color: '#ffffff', isVisible: true, bgColor: '#54B8CC', dragBgColor: '#54B8CC', borderColor: '#54B8CC', calendarId: 'workout', category: 'time', dueDateClass: '', customStyle: '', isPending: false, isFocused: false, isReadOnly: false, isPrivate: false, location: '', attendees: '', recurrenceRule: '', state: ''}
-        // ];
-        // cal.createSchedules(schedules);
+
+        cal.createSchedules(schedules);
         refreshScheduleVisibility();
     }
 

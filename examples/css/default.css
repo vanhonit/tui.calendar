@@ -5,6 +5,10 @@ body {
   color: '#333';
   font-size: 12px;
 }
+.due-date-start {
+  z-index: 9;
+  background-color: rgba(47, 47, 47, .3) !important;
+}
 
 /**  custom bootstrap - start */
 .btn {
