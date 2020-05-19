@@ -64,14 +64,13 @@
             'week.timegridHalfHour.height': '100px',
             'week.timegridHalfHour.borderBottom': '1px solid #ecedf0',
             'week.timegridQuarterHour.height': '50px',
-            'week.timegridQuarterHour.borderBottom': '1px solid #ecedf0',
-            'week.timegrid.paddingRight': '0px'
+            'week.timegridQuarterHour.borderBottom': '1px solid #ecedf0'
         },
         scheduleView: ['time'],
         taskView: false,
         disableClick: true,
         disableDblClick: true,
-        startDisableGrid: moment().add(2, 'days').add(15, 'minutes').toISOString(),
+        startDisableGrid: moment().add(1, 'days').add(15, 'minutes').toISOString(),
         showCreationGuideOnHover: false,
         customCheckExpectedCondition: function(time) { //eslint-disable-line
             // console.log(new Date(time.timeY), availableTime);
@@ -506,8 +505,8 @@
                 title: 'Practice ggggg',
                 dueDateClass: 'due-date-start',
                 isDueDate: true,
-                start: moment().add(2, 'days').add(15, 'minutes').toISOString(),
-                end: moment().add(2, 'days').add(30, 'minutes').toISOString(),
+                start: moment().add(1, 'days').add(15, 'minutes').toISOString(),
+                end: moment().add(1, 'days').add(30, 'minutes').toISOString(),
                 isReadOnly: true
             },
             {

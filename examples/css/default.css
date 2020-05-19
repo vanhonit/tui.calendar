@@ -8,6 +8,8 @@ body {
 .due-date-start {
   z-index: 9;
   background-color: rgba(47, 47, 47, .3) !important;
+  width: calc(100% + 9px) !important;
+  left: 0 !important;
 }
 
 /**  custom bootstrap - start */
