@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Mon May 18 2020
+ * @version 1.12.11 | Tue May 19 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -17959,6 +17959,12 @@ function Schedule() {
     this.isPrivate = false;
 
     /**
+     * private schedule
+     * @type {boolean}
+     */
+    this.isDueDate = false;
+
+    /**
      * location
      * @type {string}
      */
@@ -18057,6 +18063,7 @@ Schedule.prototype.init = function(options) {
     this.attendees = options.attendees || [];
     this.recurrenceRule = options.recurrenceRule || '';
     this.isPrivate = options.isPrivate || false;
+    this.isDueDate = options.isDueDate || false;
     this.isPending = options.isPending || false;
     this.isFocused = options.isFocused || false;
     this.isReadOnly = options.isReadOnly || false;
@@ -20961,6 +20968,7 @@ var helpers = {
             left = getElSize(viewModel.left, '%', 'left'),
             width = getElSize(viewModel.width, '%', 'width'),
             height = getElSize(viewModel.height, 'px', 'height');
+        console.log(viewModel);
 
         return [top, left, width, height].join(';');
     },
@@ -22774,83 +22782,89 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
 
 var Handlebars = __webpack_require__(/*! ./node_modules/handlebars/runtime.js */ "./node_modules/handlebars/runtime.js");
 module.exports = (Handlebars['default'] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
-    var stack1;
+    var helper;
 
-  return ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(2, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":4},"end":{"line":60,"column":13}}})) != null ? stack1 : "");
-},"2":function(container,depth0,helpers,partials,data) {
-    var stack1;
-
-  return ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":8},"end":{"line":59,"column":17}}})) != null ? stack1 : "");
+  return " "
+    + container.escapeExpression(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":2,"column":38},"end":{"line":2,"column":52}}}) : helper)))
+    + "time-date-schedule-block-disable";
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;
 
-  return ((stack1 = helpers["if"].call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":8},"end":{"line":58,"column":17}}})) != null ? stack1 : "");
+  return ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":4},"end":{"line":61,"column":13}}})) != null ? stack1 : "");
 },"4":function(container,depth0,helpers,partials,data) {
+    var stack1;
+
+  return ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":8},"end":{"line":60,"column":17}}})) != null ? stack1 : "");
+},"5":function(container,depth0,helpers,partials,data) {
+    var stack1;
+
+  return ((stack1 = helpers["if"].call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"if","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":59,"column":17}}})) != null ? stack1 : "");
+},"6":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
 
   return "<div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":6,"column":20},"end":{"line":6,"column":34}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":7,"column":20},"end":{"line":7,"column":34}}}) : helper)))
     + "time-date-schedule-block "
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isPending : stack1),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":59},"end":{"line":6,"column":136}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isPending : stack1),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":59},"end":{"line":7,"column":136}}})) != null ? stack1 : "")
     + " "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.dueDateClass : stack1), depth0))
     + "\" data-id=\""
-    + alias4((helpers.stamp||(depth0 && depth0.stamp)||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"stamp","hash":{},"data":data,"loc":{"start":{"line":6,"column":170},"end":{"line":6,"column":185}}}))
+    + alias4((helpers.stamp||(depth0 && depth0.stamp)||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"stamp","hash":{},"data":data,"loc":{"start":{"line":7,"column":170},"end":{"line":7,"column":185}}}))
     + "\"\n            style=\""
-    + alias4((helpers["time-scheduleBlock"]||(depth0 && depth0["time-scheduleBlock"])||alias2).call(alias1,depth0,{"name":"time-scheduleBlock","hash":{},"data":data,"loc":{"start":{"line":7,"column":19},"end":{"line":7,"column":46}}}))
+    + alias4((helpers["time-scheduleBlock"]||(depth0 && depth0["time-scheduleBlock"])||alias2).call(alias1,depth0,{"name":"time-scheduleBlock","hash":{},"data":data,"loc":{"start":{"line":8,"column":19},"end":{"line":8,"column":46}}}))
     + ";\n"
-    + ((stack1 = (helpers.fi||(depth0 && depth0.fi)||alias2).call(alias1,(depth0 != null ? depth0.left : depth0),"!==",0,{"name":"fi","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":8,"column":16},"end":{"line":10,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers.fi||(depth0 && depth0.fi)||alias2).call(alias1,(depth0 != null ? depth0.left : depth0),"!==",0,{"name":"fi","hash":{},"fn":container.program(9, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":9,"column":16},"end":{"line":11,"column":23}}})) != null ? stack1 : "")
     + "            \">\n            <div data-schedule-id=\""
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.id : stack1), depth0))
     + "\" data-calendar-id=\""
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.calendarId : stack1), depth0))
     + "\" class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":12,"column":96},"end":{"line":12,"column":110}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":13,"column":96},"end":{"line":13,"column":110}}}) : helper)))
     + "time-schedule "
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(9, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":12,"column":124},"end":{"line":12,"column":190}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":13,"column":124},"end":{"line":13,"column":190}}})) != null ? stack1 : "")
     + "\"\n                style=\"\n"
-    + ((stack1 = helpers.unless.call(alias1,(depth0 != null ? depth0.croppedEnd : depth0),{"name":"unless","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":14,"column":16},"end":{"line":17,"column":27}}})) != null ? stack1 : "")
-    + ((stack1 = helpers.unless.call(alias1,(depth0 != null ? depth0.croppedStart : depth0),{"name":"unless","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":18,"column":16},"end":{"line":21,"column":27}}})) != null ? stack1 : "")
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(15, data, 0),"inverse":container.program(17, data, 0),"data":data,"loc":{"start":{"line":22,"column":16},"end":{"line":26,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.unless.call(alias1,(depth0 != null ? depth0.croppedEnd : depth0),{"name":"unless","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":15,"column":16},"end":{"line":18,"column":27}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.unless.call(alias1,(depth0 != null ? depth0.croppedStart : depth0),{"name":"unless","hash":{},"fn":container.program(15, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":19,"column":16},"end":{"line":22,"column":27}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(17, data, 0),"inverse":container.program(19, data, 0),"data":data,"loc":{"start":{"line":23,"column":16},"end":{"line":27,"column":23}}})) != null ? stack1 : "")
     + "                 "
     + alias4(alias5(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.customStyle : stack1), depth0))
     + "\"\n            >\n"
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasGoingDuration : depth0),{"name":"if","hash":{},"fn":container.program(19, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":29,"column":12},"end":{"line":37,"column":19}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasGoingDuration : depth0),{"name":"if","hash":{},"fn":container.program(21, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":30,"column":12},"end":{"line":38,"column":19}}})) != null ? stack1 : "")
     + "                <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":38,"column":28},"end":{"line":38,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":39,"column":28},"end":{"line":39,"column":42}}}) : helper)))
     + "time-schedule-content "
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":38,"column":64},"end":{"line":38,"column":78}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":39,"column":64},"end":{"line":39,"column":78}}}) : helper)))
     + "time-schedule-content-time\" style=\"height: "
-    + alias4(((helper = (helper = helpers.modelDurationHeight || (depth0 != null ? depth0.modelDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"modelDurationHeight","hash":{},"data":data,"loc":{"start":{"line":38,"column":121},"end":{"line":38,"column":144}}}) : helper)))
+    + alias4(((helper = (helper = helpers.modelDurationHeight || (depth0 != null ? depth0.modelDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"modelDurationHeight","hash":{},"data":data,"loc":{"start":{"line":39,"column":121},"end":{"line":39,"column":144}}}) : helper)))
     + "px;\n"
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(20, data, 0),"inverse":container.program(22, data, 0),"data":data,"loc":{"start":{"line":39,"column":16},"end":{"line":43,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(22, data, 0),"inverse":container.program(24, data, 0),"data":data,"loc":{"start":{"line":40,"column":16},"end":{"line":44,"column":23}}})) != null ? stack1 : "")
     + "                "
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasComingDuration : depth0),{"name":"if","hash":{},"fn":container.program(24, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":44,"column":16},"end":{"line":44,"column":96}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasComingDuration : depth0),{"name":"if","hash":{},"fn":container.program(26, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":45,"column":16},"end":{"line":45,"column":96}}})) != null ? stack1 : "")
     + "\">\n                    "
-    + ((stack1 = (helpers["time-tmpl"]||(depth0 && depth0["time-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"time-tmpl","hash":{},"data":data,"loc":{"start":{"line":45,"column":20},"end":{"line":45,"column":41}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["time-tmpl"]||(depth0 && depth0["time-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"time-tmpl","hash":{},"data":data,"loc":{"start":{"line":46,"column":20},"end":{"line":46,"column":41}}})) != null ? stack1 : "")
     + "\n                </div>\n"
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasComingDuration : depth0),{"name":"if","hash":{},"fn":container.program(26, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":47,"column":12},"end":{"line":54,"column":19}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hasComingDuration : depth0),{"name":"if","hash":{},"fn":container.program(28, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":48,"column":12},"end":{"line":55,"column":19}}})) != null ? stack1 : "")
     + "            </div>\n            "
-    + ((stack1 = helpers.unless.call(alias1,(helpers.or||(depth0 && depth0.or)||alias2).call(alias1,(depth0 != null ? depth0.croppedEnd : depth0),((stack1 = (data && data.root)) && stack1.isReadOnly),((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isReadOnly : stack1),{"name":"or","hash":{},"data":data,"loc":{"start":{"line":56,"column":22},"end":{"line":56,"column":71}}}),{"name":"unless","hash":{},"fn":container.program(29, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":56,"column":12},"end":{"line":56,"column":202}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.unless.call(alias1,(helpers.or||(depth0 && depth0.or)||alias2).call(alias1,(depth0 != null ? depth0.croppedEnd : depth0),((stack1 = (data && data.root)) && stack1.isReadOnly),((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isReadOnly : stack1),{"name":"or","hash":{},"data":data,"loc":{"start":{"line":57,"column":22},"end":{"line":57,"column":71}}}),{"name":"unless","hash":{},"fn":container.program(31, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":57,"column":12},"end":{"line":57,"column":202}}})) != null ? stack1 : "")
     + "\n        </div>\n";
-},"5":function(container,depth0,helpers,partials,data) {
+},"7":function(container,depth0,helpers,partials,data) {
     var helper;
 
   return " "
-    + container.escapeExpression(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":6,"column":83},"end":{"line":6,"column":97}}}) : helper)))
+    + container.escapeExpression(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":7,"column":83},"end":{"line":7,"column":97}}}) : helper)))
     + "time-date-schedule-block-pending";
-},"7":function(container,depth0,helpers,partials,data) {
+},"9":function(container,depth0,helpers,partials,data) {
     var stack1;
 
   return "                    padding-left: "
     + container.escapeExpression(container.lambda(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.paddingLeft), depth0))
     + ";\n";
-},"9":function(container,depth0,helpers,partials,data) {
+},"11":function(container,depth0,helpers,partials,data) {
     var helper;
 
-  return container.escapeExpression(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":12,"column":147},"end":{"line":12,"column":161}}}) : helper)))
+  return container.escapeExpression(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":13,"column":147},"end":{"line":13,"column":161}}}) : helper)))
     + "time-schedule-focused ";
-},"11":function(container,depth0,helpers,partials,data) {
+},"13":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression;
 
   return "                    border-bottom-left-radius: "
@@ -22858,7 +22872,7 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + ";\n                    border-bottom-right-radius: "
     + alias2(alias1(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.borderRadius), depth0))
     + ";\n";
-},"13":function(container,depth0,helpers,partials,data) {
+},"15":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression;
 
   return "                    border-top-left-radius: "
@@ -22866,7 +22880,7 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + ";\n                    border-top-right-radius: "
     + alias2(alias1(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.borderRadius), depth0))
     + ";\n";
-},"15":function(container,depth0,helpers,partials,data) {
+},"17":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression;
 
   return "                    color: #ffffff; background-color:"
@@ -22874,7 +22888,7 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "; border-color:"
     + alias2(alias1(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.color : stack1), depth0))
     + ";\n";
-},"17":function(container,depth0,helpers,partials,data) {
+},"19":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression;
 
   return "                    color:"
@@ -22884,65 +22898,65 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + "; border-color:"
     + alias2(alias1(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.borderColor : stack1), depth0))
     + ";\n";
-},"19":function(container,depth0,helpers,partials,data) {
+},"21":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "                <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":30,"column":28},"end":{"line":30,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":31,"column":28},"end":{"line":31,"column":42}}}) : helper)))
     + "time-schedule-content "
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":30,"column":64},"end":{"line":30,"column":78}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":31,"column":64},"end":{"line":31,"column":78}}}) : helper)))
     + "time-schedule-content-travel-time\" style=\"height: "
-    + alias4(((helper = (helper = helpers.goingDurationHeight || (depth0 != null ? depth0.goingDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"goingDurationHeight","hash":{},"data":data,"loc":{"start":{"line":30,"column":128},"end":{"line":30,"column":151}}}) : helper)))
+    + alias4(((helper = (helper = helpers.goingDurationHeight || (depth0 != null ? depth0.goingDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"goingDurationHeight","hash":{},"data":data,"loc":{"start":{"line":31,"column":128},"end":{"line":31,"column":151}}}) : helper)))
     + "px;\n"
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(20, data, 0),"inverse":container.program(22, data, 0),"data":data,"loc":{"start":{"line":31,"column":16},"end":{"line":35,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(22, data, 0),"inverse":container.program(24, data, 0),"data":data,"loc":{"start":{"line":32,"column":16},"end":{"line":36,"column":23}}})) != null ? stack1 : "")
     + "                border-bottom: 1px dashed "
-    + alias4(((helper = (helper = helpers.travelBorderColor || (depth0 != null ? depth0.travelBorderColor : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"travelBorderColor","hash":{},"data":data,"loc":{"start":{"line":36,"column":42},"end":{"line":36,"column":63}}}) : helper)))
+    + alias4(((helper = (helper = helpers.travelBorderColor || (depth0 != null ? depth0.travelBorderColor : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"travelBorderColor","hash":{},"data":data,"loc":{"start":{"line":37,"column":42},"end":{"line":37,"column":63}}}) : helper)))
     + ";\">"
-    + ((stack1 = (helpers["goingDuration-tmpl"]||(depth0 && depth0["goingDuration-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"goingDuration-tmpl","hash":{},"data":data,"loc":{"start":{"line":36,"column":66},"end":{"line":36,"column":96}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["goingDuration-tmpl"]||(depth0 && depth0["goingDuration-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"goingDuration-tmpl","hash":{},"data":data,"loc":{"start":{"line":37,"column":66},"end":{"line":37,"column":96}}})) != null ? stack1 : "")
     + "</div>\n";
-},"20":function(container,depth0,helpers,partials,data) {
+},"22":function(container,depth0,helpers,partials,data) {
     var stack1;
 
   return "                    border-color:"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.color : stack1), depth0))
     + ";\n";
-},"22":function(container,depth0,helpers,partials,data) {
+},"24":function(container,depth0,helpers,partials,data) {
     var stack1;
 
   return "                    border-color:"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.borderColor : stack1), depth0))
     + ";\n";
-},"24":function(container,depth0,helpers,partials,data) {
+},"26":function(container,depth0,helpers,partials,data) {
     var helper;
 
   return "border-bottom: 1px dashed "
-    + container.escapeExpression(((helper = (helper = helpers.travelBorderColor || (depth0 != null ? depth0.travelBorderColor : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"travelBorderColor","hash":{},"data":data,"loc":{"start":{"line":44,"column":67},"end":{"line":44,"column":88}}}) : helper)))
+    + container.escapeExpression(((helper = (helper = helpers.travelBorderColor || (depth0 != null ? depth0.travelBorderColor : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"travelBorderColor","hash":{},"data":data,"loc":{"start":{"line":45,"column":67},"end":{"line":45,"column":88}}}) : helper)))
     + ";";
-},"26":function(container,depth0,helpers,partials,data) {
+},"28":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "                <div class=\""
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":48,"column":28},"end":{"line":48,"column":42}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":49,"column":28},"end":{"line":49,"column":42}}}) : helper)))
     + "time-schedule-content "
-    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":48,"column":64},"end":{"line":48,"column":78}}}) : helper)))
+    + alias4(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":49,"column":64},"end":{"line":49,"column":78}}}) : helper)))
     + "time-schedule-content-travel-time\" style=\"height: "
-    + alias4(((helper = (helper = helpers.comingDurationHeight || (depth0 != null ? depth0.comingDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"comingDurationHeight","hash":{},"data":data,"loc":{"start":{"line":48,"column":128},"end":{"line":48,"column":152}}}) : helper)))
+    + alias4(((helper = (helper = helpers.comingDurationHeight || (depth0 != null ? depth0.comingDurationHeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"comingDurationHeight","hash":{},"data":data,"loc":{"start":{"line":49,"column":128},"end":{"line":49,"column":152}}}) : helper)))
     + "px;\n"
-    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(20, data, 0),"inverse":container.program(27, data, 0),"data":data,"loc":{"start":{"line":49,"column":16},"end":{"line":53,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias1,((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.isFocused : stack1),{"name":"if","hash":{},"fn":container.program(22, data, 0),"inverse":container.program(29, data, 0),"data":data,"loc":{"start":{"line":50,"column":16},"end":{"line":54,"column":23}}})) != null ? stack1 : "")
     + ";\">"
-    + ((stack1 = (helpers["comingDuration-tmpl"]||(depth0 && depth0["comingDuration-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"comingDuration-tmpl","hash":{},"data":data,"loc":{"start":{"line":53,"column":26},"end":{"line":53,"column":57}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["comingDuration-tmpl"]||(depth0 && depth0["comingDuration-tmpl"])||alias2).call(alias1,(depth0 != null ? depth0.model : depth0),{"name":"comingDuration-tmpl","hash":{},"data":data,"loc":{"start":{"line":54,"column":26},"end":{"line":54,"column":57}}})) != null ? stack1 : "")
     + "</div>\n";
-},"27":function(container,depth0,helpers,partials,data) {
+},"29":function(container,depth0,helpers,partials,data) {
     var stack1;
 
   return "                    border-color:"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? depth0.model : depth0)) != null ? stack1.borderColor : stack1), depth0))
     + ";\n                ";
-},"29":function(container,depth0,helpers,partials,data) {
+},"31":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=container.escapeExpression;
 
   return "<div class=\""
-    + alias1(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":56,"column":85},"end":{"line":56,"column":99}}}) : helper)))
+    + alias1(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":57,"column":85},"end":{"line":57,"column":99}}}) : helper)))
     + "time-resize-handle handle-x\" style=\"margin-left: "
     + alias1(container.lambda(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.paddingLeft), depth0))
     + ";\">&nbsp;</div>";
@@ -22953,8 +22967,10 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + alias2(((helper = (helper = helpers.CSS_PREFIX || (depth0 != null ? depth0.CSS_PREFIX : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(alias1,{"name":"CSS_PREFIX","hash":{},"data":data,"loc":{"start":{"line":1,"column":12},"end":{"line":1,"column":26}}}) : helper)))
     + "time-date-schedule-block-wrap\" style=\"margin-right: "
     + alias2(container.lambda(((stack1 = (depth0 != null ? depth0.styles : depth0)) != null ? stack1.marginRight : stack1), depth0))
-    + ";\">\n"
-    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.matrices : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":61,"column":9}}})) != null ? stack1 : "")
+    + ";\">\n    <div class=\""
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isDisableGrid : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":16},"end":{"line":2,"column":91}}})) != null ? stack1 : "")
+    + "\"></div>\n"
+    + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.matrices : depth0),{"name":"each","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":62,"column":9}}})) != null ? stack1 : "")
     + "</div>\n";
 },"useData":true});
 
@@ -24275,7 +24291,6 @@ var SCHEDULE_MIN_DURATION = datetime.MILLISECONDS_SCHEDULE_MIN_DURATION;
  */
 function Time(options, container, theme) {
     View.call(this, container);
-
     this.options = util.extend({
         index: 0,
         width: 0,
@@ -24288,7 +24303,6 @@ function Time(options, container, theme) {
         minHeight: 18.5,
         isReadOnly: false
     }, options);
-
     this.timeTmpl = timeTmpl;
 
     /**
@@ -24366,6 +24380,7 @@ Time.prototype._getScheduleViewBoundY = function(viewModel, options) {
     var goingDurationHeight;
     var modelDurationHeight;
     var comingDurationHeight;
+    var isDueDate = viewModel.model ? viewModel.model.isDueDate : false;
 
     modelDuration = modelDuration > SCHEDULE_MIN_DURATION ? modelDuration : SCHEDULE_MIN_DURATION;
     duration = modelDuration + goingDuration + comingDuration;
@@ -24381,7 +24396,7 @@ Time.prototype._getScheduleViewBoundY = function(viewModel, options) {
         croppedStart = true;
     }
 
-    if (height + top > baseHeight) {
+    if (height + top > baseHeight || isDueDate) {
         height = baseHeight - top;
         croppedEnd = true;
     }
@@ -24416,6 +24431,7 @@ Time.prototype.getScheduleViewBound = function(viewModel, options) {
     var boundY = this._getScheduleViewBoundY(viewModel, options);
     var schedule = viewModel.model;
     var isReadOnly = util.pick(schedule, 'isReadOnly') || false;
+    var isDisableGrid = util.pick(schedule, 'isDisableGrid') || false;
     var travelBorderColor = schedule.isFocused ? '#ffffff' : schedule.borderColor;
     if (travelBorderColor === schedule.bgColor) {
         travelBorderColor = null; // follow text color
@@ -24423,7 +24439,8 @@ Time.prototype.getScheduleViewBound = function(viewModel, options) {
 
     return util.extend({
         isReadOnly: isReadOnly,
-        travelBorderColor: travelBorderColor
+        travelBorderColor: travelBorderColor,
+        isDisableGrid: isDisableGrid
     }, boundX, boundY);
 };
 
@@ -24439,6 +24456,7 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
         hourStart = options.hourStart,
         hourEnd = options.hourEnd,
         isReadOnly = options.isReadOnly,
+        isDisableGrid = options.isDisableGrid,
         todayStart,
         baseMS;
 
@@ -24450,7 +24468,6 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
     todayStart = this._parseDateGroup(ymd);
     todayStart.setHours(hourStart);
     baseMS = datetime.millisecondsFrom('hour', (hourEnd - hourStart));
-
     forEachArr(matrices, function(matrix) {
         var maxRowLength,
             widthPercent,
@@ -24483,7 +24500,8 @@ Time.prototype._getBaseViewModel = function(ymd, matrices, containerHeight) {
                     baseWidth: widthPercent,
                     baseHeight: containerHeight,
                     columnIndex: col,
-                    isReadOnly: isReadOnly
+                    isReadOnly: isReadOnly,
+                    isDisableGrid: isDisableGrid
                 });
 
                 util.extend(viewModel, viewBound);
@@ -24510,7 +24528,8 @@ Time.prototype.render = function(ymd, matrices, containerHeight) {
     this.container.innerHTML = this.timeTmpl({
         matrices: matrices,
         styles: this._getStyles(this.theme),
-        isReadOnly: this.options.isReadOnly
+        isReadOnly: this.options.isReadOnly,
+        isDisableGrid: this.options.isDisableGrid
     });
 };
 
@@ -24685,7 +24704,6 @@ function TimeGrid(name, options, panelElement) {
     }
 
     this.stickyContainer = stickyContainer;
-
     /**
      * Time view options.
      * @type {object}
@@ -24698,7 +24716,8 @@ function TimeGrid(name, options, panelElement) {
         hourEnd: 24,
         timezones: options.timezones,
         isReadOnly: options.isReadOnly,
-        showTimezoneCollapseButton: false
+        showTimezoneCollapseButton: false,
+        startDisableGrid: options.startDisableGrid
     }, options.week);
 
     if (this.options.timezones.length < 1) {
@@ -24930,16 +24949,17 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
         isToday,
         containerHeight,
         today = datetime.format(new TZDate(), 'YYYYMMDD'),
+        isDisableGrid,
         i = 0;
 
     // clear contents
     container.innerHTML = '';
     this.children.clear();
-
     containerHeight = domutil.getSize(container.parentElement)[1];
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
         isToday = ymd === today;
+        isDisableGrid = Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD'));
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
@@ -24950,9 +24970,10 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
             isFocused: options.isFocused,
             isReadOnly: options.isReadOnly,
             hourStart: options.hourStart,
-            hourEnd: options.hourEnd
+            hourEnd: options.hourEnd,
+            isDisableGrid: isDisableGrid
         };
-
+        // console.log(childOption);
         child = new Time(
             childOption,
             domutil.appendHTMLElement('div', container, config.classname('time-date')),

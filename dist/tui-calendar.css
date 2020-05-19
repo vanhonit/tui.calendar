@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Mon May 18 2020
+ * @version 1.12.11 | Tue May 19 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -453,6 +453,13 @@
   position: relative;
   height: 100%;
 }
+.tui-full-calendar-time-date-schedule-block-disable {
+  position: relative;
+  height: 100%;
+  z-index: 9;
+  background-color: rgba(47,47,47,0.4);
+  width: calc(100% + 9px);
+}
 .tui-full-calendar-time-date-schedule-block {
   position: absolute;
   right: 0px;
@@ -484,8 +491,6 @@
 }
 .tui-full-calendar-time-schedule-content {
   overflow: hidden;
-  border-left-width: 3px;
-  border-left-style: solid;
   padding: 1px 0 0 3px;
 }
 .tui-full-calendar-time-schedule-content-travel-time {
