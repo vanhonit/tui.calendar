@@ -54,8 +54,6 @@
                 return getTimeTemplate(schedule, false);
             },
             creationGuide: function(evenData) {
-                console.log('custom creation guide', evenData);
-
                 return '<div>custom creation guide</div>';
             }
         },
@@ -71,8 +69,8 @@
         disableClick: true,
         disableDblClick: true,
         startDisableGrid: moment().add(1, 'days').add(15, 'minutes').toISOString(),
-        showCreationGuideOnHover: false,
-        customCheckExpectedCondition: function(time) { //eslint-disable-line
+        showCreationGuideOnHover: true,
+        customCheckExpectedCondition: function (time) { //eslint-disable-line
             // console.log(new Date(time.timeY), availableTime);
 
             return {
@@ -90,6 +88,9 @@
     cal.on({
         'clickMore': function(e) {
             console.log('clickMore', e);
+        },
+        'clickCreationGuide': function(schedule) {
+            console.log('onClickCreationGuide', schedule);
         },
         'clickSchedule': function(e) {
             var element;

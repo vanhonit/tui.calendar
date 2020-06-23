@@ -8,6 +8,7 @@ var common = require('../../common/common');
 var datetime = require('../../common/datetime');
 var config = require('../../config');
 var domutil = require('../../common/domutil');
+var domevent = require('../../common/domevent');
 var reqAnimFrame = require('../../common/reqAnimFrame');
 var ratio = require('../../common/common').ratio;
 var TZDate = require('../../common/timezone').Date;
@@ -63,6 +64,7 @@ function TimeCreationGuide(timeCreation) {
         timeCreationHover: this._createGuideElement,
         clearCreationGuide: this._clearGuideElement
     }, this);
+    domevent.on(this.guideElement, 'click', this._clickGuideElement, this);
 
     this.applyTheme(timeCreation.baseController.theme);
 }
@@ -220,6 +222,13 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
 
     return getStyleData;
 };
+/**
+ * DragStart event handler
+ * @param {object} dragStartEventData - dragStart schedule data.
+ */
+TimeCreationGuide.prototype._clickGuideElement = function(dragStartEventData) {
+    console.log('hrere', this);
+};
 
 /**
  * DragStart event handler
@@ -232,7 +241,6 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
 
     this._creationGuideTemplate = dragStartEventData.template;
-
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
