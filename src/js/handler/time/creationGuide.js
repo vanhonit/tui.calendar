@@ -226,8 +226,19 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
  * DragStart event handler
  * @param {object} dragStartEventData - dragStart schedule data.
  */
-TimeCreationGuide.prototype._clickGuideElement = function(dragStartEventData) {
-    console.log('hrere', this);
+TimeCreationGuide.prototype._clickGuideElement = function() {
+    /**
+     * TODO: add this action to timeCreation handle on event
+     */
+    if (
+        this.timeCreation.contexts[1]
+        && this.timeCreation.contexts[1][0]
+        && this.timeCreation.contexts[1][0]._options
+    ) {
+        if (this.timeCreation.contexts[1][0]._options.onClickCreationGuide) {
+            this.timeCreation.contexts[1][0]._options.onClickCreationGuide(this._styleStart[1], this._styleStart[2]);
+        }
+    }
 };
 
 /**
@@ -245,16 +256,15 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
     start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
-    end = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
+    end = customEndTime = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
 
     if (customCreationGuideEndTime) {
         customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
         customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
     }
-    end = new TZDate(customEndTime);
+    end = this._styleStart[2] = new TZDate(customEndTime);
     height = (unitData[4] * (end - start) / MIN60);
-
     result = this._limitStyleData(
         top,
         height,

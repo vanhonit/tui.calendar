@@ -127,7 +127,6 @@ var helpers = {
             left = getElSize(viewModel.left, '%', 'left'),
             width = getElSize(viewModel.width, '%', 'width'),
             height = getElSize(viewModel.height, 'px', 'height');
-        console.log(viewModel);
 
         return [top, left, width, height].join(';');
     },

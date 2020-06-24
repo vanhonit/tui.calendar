@@ -77,6 +77,12 @@
                 endTime: new Date().setHours(new Date().getHours() + (Math.floor(Math.random() * 2) + 1))
             };
         },
+        onClickCreationGuide: function(startTime, endTime) {
+            console.log('time', {
+                startTime: startTime,
+                endTime: endTime
+            });
+        },
         week: {
             hourStart: 7,
             hourEnd: 21,
