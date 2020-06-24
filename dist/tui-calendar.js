@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Tue May 19 2020
+ * @version 1.12.11 | Wed Jun 24 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -16004,6 +16004,7 @@ var common = __webpack_require__(/*! ../../common/common */ "./src/js/common/com
 var datetime = __webpack_require__(/*! ../../common/datetime */ "./src/js/common/datetime.js");
 var config = __webpack_require__(/*! ../../config */ "./src/js/config.js");
 var domutil = __webpack_require__(/*! ../../common/domutil */ "./src/js/common/domutil.js");
+var domevent = __webpack_require__(/*! ../../common/domevent */ "./src/js/common/domevent.js");
 var reqAnimFrame = __webpack_require__(/*! ../../common/reqAnimFrame */ "./src/js/common/reqAnimFrame.js");
 var ratio = __webpack_require__(/*! ../../common/common */ "./src/js/common/common.js").ratio;
 var TZDate = __webpack_require__(/*! ../../common/timezone */ "./src/js/common/timezone.js").Date;
@@ -16059,6 +16060,7 @@ function TimeCreationGuide(timeCreation) {
         timeCreationHover: this._createGuideElement,
         clearCreationGuide: this._clearGuideElement
     }, this);
+    domevent.on(this.guideElement, 'click', this._clickGuideElement, this);
 
     this.applyTheme(timeCreation.baseController.theme);
 }
@@ -16216,6 +16218,24 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
 
     return getStyleData;
 };
+/**
+ * DragStart event handler
+ * @param {object} dragStartEventData - dragStart schedule data.
+ */
+TimeCreationGuide.prototype._clickGuideElement = function() {
+    /**
+     * TODO: add this action to timeCreation handle on event
+     */
+    if (
+        this.timeCreation.contexts[1]
+        && this.timeCreation.contexts[1][0]
+        && this.timeCreation.contexts[1][0]._options
+    ) {
+        if (this.timeCreation.contexts[1][0]._options.onClickCreationGuide) {
+            this.timeCreation.contexts[1][0]._options.onClickCreationGuide(this._styleStart[1], this._styleStart[2]);
+        }
+    }
+};
 
 /**
  * DragStart event handler
@@ -16228,21 +16248,19 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
 
     this._creationGuideTemplate = dragStartEventData.template;
-
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
     start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
-    end = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
+    end = customEndTime = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
 
     if (customCreationGuideEndTime) {
         customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
         customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
     }
-    end = new TZDate(customEndTime);
+    end = this._styleStart[2] = new TZDate(customEndTime);
     height = (unitData[4] * (end - start) / MIN60);
-
     result = this._limitStyleData(
         top,
         height,
@@ -20968,7 +20986,6 @@ var helpers = {
             left = getElSize(viewModel.left, '%', 'left'),
             width = getElSize(viewModel.width, '%', 'width'),
             height = getElSize(viewModel.height, 'px', 'height');
-        console.log(viewModel);
 
         return [top, left, width, height].join(';');
     },
