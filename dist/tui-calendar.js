@@ -24977,7 +24977,7 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
         isToday = ymd === today;
-        isDisableGrid = Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD'));
+        isDisableGrid = options.startDisableGrid ? Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD')) : false;
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
