@@ -86,7 +86,7 @@ function getHoursLabels(opt, hasHourMarker, timezoneOffset, styles) {
         return {
             hour: hour,
             minutes: shiftMinutes,
-            hidden: nowAroundHours === hour || index === 0,
+            hidden: nowAroundHours === hour,
             color: color || '',
             fontWeight: fontWeight || ''
         };
@@ -429,9 +429,7 @@ TimeGrid.prototype.render = function(viewModel) {
     if (!scheduleLen) {
         return;
     }
-
     baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0;
-
     container.innerHTML = mainTmpl(baseViewModel);
 
     /**********
