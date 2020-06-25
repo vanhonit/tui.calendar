@@ -457,8 +457,8 @@
   position: relative;
   height: 100%;
   z-index: 9;
-  background-color: rgba(47,47,47,0.4);
-  width: calc(100% + 11px);
+  background-color: rgba(47,47,47,0.3);
+  width: calc(100% + 9px);
 }
 .tui-full-calendar-time-date-schedule-block {
   position: absolute;
