@@ -119,7 +119,6 @@ Time.prototype._getScheduleViewBoundY = function(viewModel, options) {
     var modelDurationHeight;
     var comingDurationHeight;
     var isDueDate = viewModel.model ? viewModel.model.isDueDate : false;
-
     modelDuration = modelDuration > SCHEDULE_MIN_DURATION ? modelDuration : SCHEDULE_MIN_DURATION;
     duration = modelDuration + goingDuration + comingDuration;
     height = (baseHeight * duration) / baseMS;

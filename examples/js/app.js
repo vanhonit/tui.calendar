@@ -68,7 +68,7 @@
         taskView: false,
         disableClick: true,
         disableDblClick: true,
-        startDisableGrid: moment().add(1, 'days').add(15, 'minutes').toISOString(),
+        startDisableGrid: moment().add(1, 'days').add(45, 'minutes').toISOString(),
         showCreationGuideOnHover: true,
         customCheckExpectedCondition: function (time) { //eslint-disable-line
             // console.log(new Date(time.timeY), availableTime);

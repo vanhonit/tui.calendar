@@ -86,7 +86,7 @@ function getHoursLabels(opt, hasHourMarker, timezoneOffset, styles) {
         return {
             hour: hour,
             minutes: shiftMinutes,
-            hidden: nowAroundHours === hour || index === 0,
+            hidden: nowAroundHours === hour,
             color: color || '',
             fontWeight: fontWeight || ''
         };
@@ -383,7 +383,7 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
         isToday = ymd === today;
-        isDisableGrid = Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD'));
+        isDisableGrid = options.startDisableGrid ? Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD')) : false;
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
@@ -429,9 +429,7 @@ TimeGrid.prototype.render = function(viewModel) {
     if (!scheduleLen) {
         return;
     }
-
     baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0;
-
     container.innerHTML = mainTmpl(baseViewModel);
 
     /**********
