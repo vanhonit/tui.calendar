@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Wed Jun 24 2020
+ * @version 1.12.11 | Thu Jul 02 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -15856,9 +15856,10 @@ TimeCreation.prototype._onMouseMove = function(clickEventData) {
 
     getScheduleDataFunc = this._retriveScheduleData(condResult);
     eventData = getScheduleDataFunc(clickEventData);
-
+    console.log('here', this._customCheckExpectedCondition);
     if (this._customCheckExpectedCondition) {
         customCondResult = this._customCheckExpectedCondition(eventData);
+        console.log('customCondResult', customCondResult);
         if (!customCondResult) {
             return;
         }
