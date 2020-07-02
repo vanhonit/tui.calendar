@@ -342,10 +342,8 @@ TimeCreation.prototype._onMouseMove = function(clickEventData) {
 
     getScheduleDataFunc = this._retriveScheduleData(condResult);
     eventData = getScheduleDataFunc(clickEventData);
-    console.log('here', this._customCheckExpectedCondition);
     if (this._customCheckExpectedCondition) {
         customCondResult = this._customCheckExpectedCondition(eventData);
-        console.log('customCondResult', customCondResult);
         if (!customCondResult) {
             return;
         }
