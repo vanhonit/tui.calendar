@@ -157,12 +157,15 @@
      * @returns {string}
      */
     function getTimeTemplate(schedule, isAllDay) {
+        console.log('schedule', schedule);
         var html = [];
         var start = moment(schedule.start.toUTCString());
         if (!isAllDay) {
             html.push('<strong>' + start.format('HH:mm') + '</strong> ');
         }
-        if (schedule.isPrivate) {
+        if (schedule.raw && schedule.raw.isStudyHall) {
+            html = ['<div class="study-hall-block">study-hall-block</div>'];
+        } else if (schedule.isPrivate) {
             html.push('<span class="calendar-font-icon ic-lock-b"></span>');
             html.push(' Private');
         } else {
@@ -561,7 +564,8 @@
                 category: 'time',
                 dueDateClass: '',
                 start: moment().subtract(1, 'hours').toISOString(),
-                end: moment().subtract(15, 'minutes').toISOString()
+                end: moment().subtract(15, 'minutes').toISOString(),
+                bgColor: 'red'
             }
         ];
         cal.clear();

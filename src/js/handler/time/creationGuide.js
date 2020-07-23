@@ -248,14 +248,15 @@ TimeCreationGuide.prototype._clickGuideElement = function() {
 TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
     var relatedView = dragStartEventData.relatedView,
         customCreationGuideEndTime = dragStartEventData.endTime,
+        customCreationGuideStartTime = dragStartEventData.startTime,
         hourStart = datetime.millisecondsFrom('hour', dragStartEventData.hourStart) || 0,
-        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
+        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime, customStartTime;
 
     this._creationGuideTemplate = dragStartEventData.template;
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
-    start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
+    start = customStartTime = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
     end = customEndTime = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
 
@@ -263,7 +264,12 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
         customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
     }
+    if (customCreationGuideStartTime) {
+        customStartTime = new TZDate(end).setHours(new TZDate(customCreationGuideStartTime).getHours());
+        customStartTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideStartTime).getMinutes());
+    }
     end = this._styleStart[2] = new TZDate(customEndTime);
+    start = this._styleStart[1] = new TZDate(customStartTime);
     height = (unitData[4] * (end - start) / MIN60);
     result = this._limitStyleData(
         top,

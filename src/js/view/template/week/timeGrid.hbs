@@ -9,7 +9,7 @@
             <span
                 style="{{#if hidden}}display:none{{/if}}; height: {{@root.styles.halfHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">{{{timegridDisplayPrimaryTime-tmpl this}}}</span>
             <span
-                style="{{#if hidden}}display:none{{/if}}; margin-top: {{@root.styles.halfHourHeight}}; height: {{@root.styles.halfHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">{{{timegridDisplayPrimaryTime-tmpl this true}}}</span>
+                style="margin-top: {{@root.styles.halfHourHeight}}; height: {{@root.styles.halfHourHeight}}; color: {{color}}; font-weight: {{fontWeight}};">{{{timegridDisplayPrimaryTime-tmpl this true}}}</span>
         </div>
         {{/each ~}}
         {{#if @root.showHourMarker}}
