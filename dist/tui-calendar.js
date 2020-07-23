@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Thu Jul 02 2020
+ * @version 1.12.11 | Thu Jul 23 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -16243,14 +16243,15 @@ TimeCreationGuide.prototype._clickGuideElement = function() {
 TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
     var relatedView = dragStartEventData.relatedView,
         customCreationGuideEndTime = dragStartEventData.endTime,
+        customCreationGuideStartTime = dragStartEventData.startTime,
         hourStart = datetime.millisecondsFrom('hour', dragStartEventData.hourStart) || 0,
-        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime;
+        unitData, styleFunc, styleData, result, top, height, start, end, customEndTime, customStartTime;
 
     this._creationGuideTemplate = dragStartEventData.template;
     unitData = this._styleUnit = this._getUnitData(relatedView);
     styleFunc = this._styleFunc = this._getStyleDataFunc.apply(this, unitData);
     styleData = this._styleStart = styleFunc(dragStartEventData);
-    start = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
+    start = customStartTime = new TZDate(styleData[1]).addMinutes(datetime.minutesFromHours(hourStart));
     end = customEndTime = new TZDate(styleData[2]).addMinutes(datetime.minutesFromHours(hourStart));
     top = styleData[0];
 
@@ -16258,7 +16259,12 @@ TimeCreationGuide.prototype._createGuideElement = function(dragStartEventData) {
         customEndTime = new TZDate(end).setHours(new TZDate(customCreationGuideEndTime).getHours());
         customEndTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideEndTime).getMinutes());
     }
+    if (customCreationGuideStartTime) {
+        customStartTime = new TZDate(end).setHours(new TZDate(customCreationGuideStartTime).getHours());
+        customStartTime = new TZDate(customEndTime).setMinutes(new TZDate(customCreationGuideStartTime).getMinutes());
+    }
     end = this._styleStart[2] = new TZDate(customEndTime);
+    start = this._styleStart[1] = new TZDate(customStartTime);
     height = (unitData[4] * (end - start) / MIN60);
     result = this._limitStyleData(
         top,
@@ -23048,18 +23054,16 @@ module.exports = (Handlebars['default'] || Handlebars).template({"1":function(co
     + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":10,"column":130},"end":{"line":10,"column":144}}}) : helper)))
     + ";\">"
     + ((stack1 = (helpers["timegridDisplayPrimaryTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimaryTime-tmpl"])||alias2).call(alias1,depth0,{"name":"timegridDisplayPrimaryTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":10,"column":147},"end":{"line":10,"column":189}}})) != null ? stack1 : "")
-    + "</span>\n            <span\n                style=\""
-    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.hidden : depth0),{"name":"if","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":12,"column":23},"end":{"line":12,"column":56}}})) != null ? stack1 : "")
-    + "; margin-top: "
+    + "</span>\n            <span\n                style=\"margin-top: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
     + "; height: "
     + alias4(alias5(((stack1 = ((stack1 = (data && data.root)) && stack1.styles)) && stack1.halfHourHeight), depth0))
     + "; color: "
-    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":12,"column":151},"end":{"line":12,"column":160}}}) : helper)))
+    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data,"loc":{"start":{"line":12,"column":116},"end":{"line":12,"column":125}}}) : helper)))
     + "; font-weight: "
-    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":12,"column":175},"end":{"line":12,"column":189}}}) : helper)))
+    + alias4(((helper = (helper = helpers.fontWeight || (depth0 != null ? depth0.fontWeight : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fontWeight","hash":{},"data":data,"loc":{"start":{"line":12,"column":140},"end":{"line":12,"column":154}}}) : helper)))
     + ";\">"
-    + ((stack1 = (helpers["timegridDisplayPrimaryTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimaryTime-tmpl"])||alias2).call(alias1,depth0,true,{"name":"timegridDisplayPrimaryTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":12,"column":192},"end":{"line":12,"column":239}}})) != null ? stack1 : "")
+    + ((stack1 = (helpers["timegridDisplayPrimaryTime-tmpl"]||(depth0 && depth0["timegridDisplayPrimaryTime-tmpl"])||alias2).call(alias1,depth0,true,{"name":"timegridDisplayPrimaryTime-tmpl","hash":{},"data":data,"loc":{"start":{"line":12,"column":157},"end":{"line":12,"column":204}}})) != null ? stack1 : "")
     + "</span>\n        </div>\n";
 },"6":function(container,depth0,helpers,partials,data) {
     return "display:none";
