@@ -15863,6 +15863,7 @@ TimeCreation.prototype._onMouseMove = function(clickEventData) {
         }
     }
     eventData.endTime = customCondResult.endTime;
+    eventData.delta = customCondResult.delta;
     eventData.template = this._creationGuideTemplate;
     this._requestOnHover = true;
     setTimeout(function() {
