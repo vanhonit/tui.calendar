@@ -225,9 +225,9 @@ TimeCreationGuide.prototype._getStyleDataFunc = function(viewHeight, hourLength,
 };
 /**
  * DragStart event handler
- * @param {object} dragStartEventData - dragStart schedule data.
+ * @param {object} event - dragStart schedule data.
  */
-TimeCreationGuide.prototype._clickGuideElement = function() {
+TimeCreationGuide.prototype._clickGuideElement = function(event) {
     /**
      * TODO: add this action to timeCreation handle on event
      */
@@ -237,7 +237,10 @@ TimeCreationGuide.prototype._clickGuideElement = function() {
         && this.timeCreation.contexts[1][0]._options
     ) {
         if (this.timeCreation.contexts[1][0]._options.onClickCreationGuide) {
-            this.timeCreation.contexts[1][0]._options.onClickCreationGuide(this._styleStart[1], this._styleStart[2]);
+            this.timeCreation.contexts[1][0]._options.onClickCreationGuide(
+                this._styleStart[1],
+                this._styleStart[2],
+                event);
         }
     }
 };
