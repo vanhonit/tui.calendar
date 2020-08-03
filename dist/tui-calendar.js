@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Tue Jul 28 2020
+ * @version 1.12.11 | Mon Aug 03 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -16054,9 +16054,9 @@ function TimeCreationGuide(timeCreation) {
     this._styleFunc = null;
 
     timeCreation.on({
-        timeCreationDragstart: this._createGuideElement,
-        timeCreationDrag: this._onDrag,
-        timeCreationClick: this._createGuideElement,
+        // timeCreationDragstart: this._createGuideElement,
+        // timeCreationDrag: this._onDrag,
+        // timeCreationClick: this._createGuideElement,
         timeCreationHover: this._createGuideElement,
         clearCreationGuide: this._clearGuideElement
     }, this);
