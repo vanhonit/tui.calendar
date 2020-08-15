@@ -25,9 +25,32 @@ var timeCore = {
     _calcGridYIndex: function(baseMil, height, y) {
         // get ratio from right expression > point.y : x = session.height : baseMil
         // and convert milliseconds value to hours.
+        var range = [
+            0,
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1
+        ];
         var result = datetime.millisecondsTo('hour', (y * baseMil) / height),
             floored = result | 0,
-            nearest = common.nearest(result - floored, [0, 0.25, 0.5, 0.75, 1]);
+            nearest = common.nearest(result - floored, range);
 
         // return floored + (nearest ? 0.5 : 0);
         return floored + nearest;
