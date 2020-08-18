@@ -79,6 +79,11 @@ function TimeCreation(dragHandler, timeGridView, baseController, options) {
     this._showCreationGuideOnHover = options.showCreationGuideOnHover;
 
     /**
+     * @type {boolean}
+     */
+    this._showCreationGuideOnClick = options.showCreationGuideOnClick;
+
+    /**
      * @type {function}
      */
     this._customCheckExpectedCondition = options.customCheckExpectedCondition;
@@ -96,6 +101,10 @@ function TimeCreation(dragHandler, timeGridView, baseController, options) {
     dragHandler.on('dragStart', this._onDragStart, this);
     dragHandler.on('click', this._onClick, this);
 
+    if (this._showCreationGuideOnClick) {
+        domevent.on(timeGridView.container, 'click', this._onClick, this);
+    }
+    
     if (this._showCreationGuideOnHover) {
         domevent.on(timeGridView.container, 'mousemove', this._onMouseMove, this);
         domevent.on(timeGridView.container, 'mouseleave', this._onMouseLeave, this);
@@ -383,26 +392,37 @@ TimeCreation.prototype._onMouseLeave = function() { // hoveEvenData
  */
 TimeCreation.prototype._onClick = function(clickEventData) {
     var self = this;
-    var condResult, getScheduleDataFunc, eventData;
-
+    var condResult, getScheduleDataFunc, eventData, customCondResult;
     this.dragHandler.off({
         drag: this._onDrag,
         dragEnd: this._onDragEnd
     }, this);
 
     condResult = this.checkExpectedCondition(clickEventData.target);
-    if (!condResult || this._disableClick) {
+    if (!condResult || this._disableHover) {
+        // self.fire('clearCreationGuide', eventData);
+
         return;
     }
 
     getScheduleDataFunc = this._retriveScheduleData(condResult);
-    eventData = getScheduleDataFunc(clickEventData.originEvent);
-
+    eventData = getScheduleDataFunc(clickEventData);
+    if (this._customCheckExpectedCondition) {
+        customCondResult = this._customCheckExpectedCondition(eventData);
+        if (!customCondResult) {
+            return;
+        }
+    }
+    eventData.endTime = customCondResult.endTime;
+    eventData.delta = customCondResult.delta;
+    eventData.template = this._creationGuideTemplate;
     this._requestOnClick = true;
     setTimeout(function() {
         if (self._requestOnClick) {
             self.fire('timeCreationClick', eventData);
             self._createSchedule(eventData);
+            // trigger click guide element
+            self.guide._clickGuideElement(self.guide.guideElement.getBoundingClientRect());
         }
         self._requestOnClick = false;
     }, CLICK_DELAY);

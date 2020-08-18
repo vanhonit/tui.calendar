@@ -76,7 +76,7 @@ var timeCore = {
          * @returns {object} - common event data for time.*
          */
         return util.bind(function(mouseEvent, extend) {
-            var mouseY = Point.n(domevent.getMousePosition(mouseEvent, container)).y,
+            var mouseY = Point.n(domevent.getMousePosition(mouseEvent.originEvent || mouseEvent, container)).y,
                 gridY = common.ratio(viewHeight, hourLength, mouseY),
                 timeY = new TZDate(viewTime).addMinutes(datetime.minutesFromHours(gridY)),
                 nearestGridY = self._calcGridYIndex(baseMil, viewHeight, mouseY),
