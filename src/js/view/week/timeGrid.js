@@ -141,7 +141,8 @@ function TimeGrid(name, options, panelElement) {
         timezones: options.timezones,
         isReadOnly: options.isReadOnly,
         showTimezoneCollapseButton: false,
-        startDisableGrid: options.startDisableGrid
+        startDisableGrid: options.startDisableGrid,
+        showCurrentTimeInRange: options.showCurrentTimeInRange ? options.showCurrentTimeInRange(new TZDate()) : true
     }, options.week);
 
     if (this.options.timezones.length < 1) {
@@ -429,7 +430,7 @@ TimeGrid.prototype.render = function(viewModel) {
     if (!scheduleLen) {
         return;
     }
-    baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0;
+    baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0 && opt.showCurrentTimeInRange;
     container.innerHTML = mainTmpl(baseViewModel);
 
     /**********
