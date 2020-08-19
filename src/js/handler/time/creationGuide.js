@@ -60,7 +60,7 @@ function TimeCreationGuide(timeCreation) {
     timeCreation.on({
         // timeCreationDragstart: this._createGuideElement,
         // timeCreationDrag: this._onDrag,
-        // timeCreationClick: this._createGuideElement,
+        timeCreationClick: this._createGuideElement,
         timeCreationHover: this._createGuideElement,
         clearCreationGuide: this._clearGuideElement
     }, this);
