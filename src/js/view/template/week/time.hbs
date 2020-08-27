@@ -1,5 +1,12 @@
 <div class="{{CSS_PREFIX}}time-date-schedule-block-wrap" style="margin-right: {{styles.marginRight}};">
-    <div class="{{#if isDisableGrid}} {{CSS_PREFIX}}time-date-schedule-block-disable{{/if}}"></div>
+{{#if disabledGrid.isDisabled}}
+    <div class="{{CSS_PREFIX}}time-date-schedule-block-disable"
+        style="top: {{multiply @root.styles.oneHourHeight disabledGrid.hourDisabled}}px; height: calc(100% - {{multiply @root.styles.oneHourHeight disabledGrid.hourDisabled}}px)">
+        {{#if disabledGrid.elementDisabled}}
+        {{{disabledGrid.elementDisabled}}}
+        {{/if}}
+    </div>
+{{/if}}
 {{#each matrices}}
     {{#each this}}
         {{#each this}}

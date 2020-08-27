@@ -74,6 +74,8 @@ var helpers = {
                 return (a < b) ? options.fn(this) : options.inverse(this);
             case '||':
                 return (a || b) ? options.fn(this) : options.inverse(this);
+            case '&&':
+                return (a && b) ? options.fn(this) : options.inverse(this);
             default:
                 throw new Error('Not match operation');
         }
