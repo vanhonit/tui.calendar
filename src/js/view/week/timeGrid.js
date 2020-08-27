@@ -141,9 +141,33 @@ function TimeGrid(name, options, panelElement) {
         timezones: options.timezones,
         isReadOnly: options.isReadOnly,
         showTimezoneCollapseButton: false,
-        startDisableGrid: options.startDisableGrid,
-        showCurrentTimeInRange: options.showCurrentTimeInRange ? options.showCurrentTimeInRange(new TZDate()) : true
+        disabledGrid: {
+            isDisabled: false,
+            hourDisabled: null,
+            elementDisabled: null
+        },
+        currentTimeSettings: {
+            todayMarker: true,
+            positionHourMarker: 'all',
+            onlyShowInRange: false
+        }
     }, options.week);
+
+    if (options.disabledGrid) {
+        this.options.disabledGrid = {
+            isDisabled: options.disabledGrid.isDisabled,
+            hourDisabled: options.disabledGrid.hourDisabled,
+            elementDisabled: options.disabledGrid.elementDisabled
+        };
+    }
+
+    if (options.currentTimeSettings) {
+        this.options.currentTimeSettings = {
+            todayMarker: options.currentTimeSettings.todayMarker,
+            positionHourMarker: options.currentTimeSettings.positionHourMarker,
+            onlyShowInRange: options.currentTimeSettings.onlyShowInRange ? options.currentTimeSettings.onlyShowInRange(new TZDate()) : false
+        };
+    }
 
     if (this.options.timezones.length < 1) {
         this.options.timezones = [{
@@ -375,6 +399,10 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
         containerHeight,
         today = datetime.format(new TZDate(), 'YYYYMMDD'),
         isDisableGrid,
+        hourDisabled = new TZDate(options.disabledGrid.hourDisabled).getHours(),
+        minuteDisabled = new TZDate(options.disabledGrid.hourDisabled).getMinutes(),
+        ratioByHourDisabled,
+        elementDisabled,
         i = 0;
 
     // clear contents
@@ -383,8 +411,22 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     containerHeight = domutil.getSize(container.parentElement)[1];
     // reconcilation of child views
     util.forEach(viewModels, function(schedules, ymd) {
+        var isDueDate = Number(ymd) == Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'));
         isToday = ymd === today;
-        isDisableGrid = options.startDisableGrid ? Number(ymd) > Number(datetime.format(new TZDate(options.startDisableGrid), 'YYYYMMDD')) : false;
+        isDisableGrid = options.disabledGrid.hourDisabled ? Number(ymd) >= Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD')) : false;
+        ratioByHourDisabled = 0;
+        elementDisabled = null;
+        if (isDueDate) {
+            ratioByHourDisabled = (hourDisabled - options.hourStart) + (minuteDisabled / 60);
+            elementDisabled = options.disabledGrid.elementDisabled;
+            if (hourDisabled < options.hourStart) {
+                ratioByHourDisabled = 0;
+                elementDisabled = null;
+            } else if (hourDisabled > options.hourEnd) {
+                ratioByHourDisabled = options.hourEnd - options.hourStart;
+                elementDisabled = null;
+            }
+        }
         childOption = {
             index: i,
             left: grids[i] ? grids[i].left : 0,
@@ -396,7 +438,11 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
             isReadOnly: options.isReadOnly,
             hourStart: options.hourStart,
             hourEnd: options.hourEnd,
-            isDisableGrid: isDisableGrid
+            disabledGrid: {
+                isDisabled: isDisableGrid,
+                hourDisabled: Number(ratioByHourDisabled.toFixed(2)),
+                elementDisabled: elementDisabled
+            }
         };
         // console.log(childOption);
         child = new Time(
@@ -430,7 +476,11 @@ TimeGrid.prototype.render = function(viewModel) {
     if (!scheduleLen) {
         return;
     }
-    baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0 && opt.showCurrentTimeInRange;
+
+    baseViewModel.todayMarker = opt.currentTimeSettings.todayMarker;
+    baseViewModel.showHourMarker = baseViewModel.todaymarkerLeft >= 0 && opt.currentTimeSettings.onlyShowInRange;
+    baseViewModel.positionHourMarker = opt.currentTimeSettings.positionHourMarker;
+
     container.innerHTML = mainTmpl(baseViewModel);
 
     /**********

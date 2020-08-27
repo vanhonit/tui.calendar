@@ -266,7 +266,7 @@ Time.prototype.render = function(ymd, matrices, containerHeight) {
         matrices: matrices,
         styles: this._getStyles(this.theme),
         isReadOnly: this.options.isReadOnly,
-        isDisableGrid: this.options.isDisableGrid
+        disabledGrid: this.options.disabledGrid
     });
 };
 
@@ -285,6 +285,7 @@ Time.prototype._getStyles = function(theme) {
         styles.borderRadius = theme.week.timegridSchedule.borderRadius;
         styles.paddingLeft = theme.week.timegridSchedule.paddingLeft;
         styles.backgroundColor = options.isToday ? theme.week.today.backgroundColor : 'inherit';
+        styles.oneHourHeight = Number(theme.week.timegridOneHour.height.replace(/\px|cm|em|%/g, ''));
     }
 
     return styles;
