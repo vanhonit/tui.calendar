@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Calendar
- * @version 1.12.11 | Thu Aug 27 2020
+ * @version 1.12.11 | Mon Sep 21 2020
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -26050,7 +26050,7 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     util.forEach(viewModels, function(schedules, ymd) {
         var isDueDate = Number(ymd) == Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'));
         isToday = ymd === today;
-        isDisableGrid = options.disabledGrid.hourDisabled ? Number(ymd) >= Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD')) : false;
+        isDisableGrid = options.disabledGrid.hourDisabled ? ((isDueDate ? hourDisabled >= options.hourStart && hourDisabled < options.hourEnd : true) && Number(ymd) >= Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'))) : false;
         ratioByHourDisabled = 0;
         elementDisabled = null;
         if (isDueDate) {
