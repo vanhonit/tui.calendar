@@ -413,7 +413,7 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
     util.forEach(viewModels, function(schedules, ymd) {
         var isDueDate = Number(ymd) == Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'));
         isToday = ymd === today;
-        isDisableGrid = options.disabledGrid.hourDisabled ? ((isDueDate ? hourDisabled >= options.hourStart && hourDisabled < options.hourEnd : true) && Number(ymd) >= Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'))) : false;
+        isDisableGrid = options.disabledGrid.hourDisabled && Number(ymd) >= Number(datetime.format(new TZDate(options.disabledGrid.hourDisabled), 'YYYYMMDD'));
         ratioByHourDisabled = 0;    
         elementDisabled = null;
         if (isDueDate) {
@@ -422,7 +422,7 @@ TimeGrid.prototype._renderChildren = function(viewModels, grids, container, them
             if (hourDisabled < options.hourStart) {
                 ratioByHourDisabled = 0;
                 elementDisabled = null;
-            } else if (hourDisabled > options.hourEnd) {
+            } else if (hourDisabled >= options.hourEnd) {
                 ratioByHourDisabled = options.hourEnd - options.hourStart;
                 elementDisabled = null;
             }
